@@ -121,4 +121,8 @@ class ContactData {
         this.additionalProperties[name] = value
     }
 
+    override fun toString(): String {
+        return "ContactData(additionalProperties=$additionalProperties)"
+    }
+
 }

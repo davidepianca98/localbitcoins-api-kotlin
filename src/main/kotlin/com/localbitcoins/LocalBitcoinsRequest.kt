@@ -61,11 +61,7 @@ class LocalBitcoinsRequest(
     fun pullData(): String {
         val response = content
         if (response != null) {
-            try {
-                return BufferedReader(InputStreamReader(response.entity.content)).use(BufferedReader::readText)
-            } catch (e: IOException) {
-                e.printStackTrace()
-            }
+            return BufferedReader(InputStreamReader(response.entity.content)).use(BufferedReader::readText)
         }
         return ""
     }
@@ -84,6 +80,7 @@ class LocalBitcoinsRequest(
         const val RELEASED = DASHBOARD + "released/"
         const val CANCELED = DASHBOARD + "canceled/"
         const val CLOSED = DASHBOARD + "closed/"
+        const val FEES = "/fees/"
     }
 
 }

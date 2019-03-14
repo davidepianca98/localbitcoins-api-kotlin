@@ -5,6 +5,8 @@ import com.localbitcoins.pojo.advertisment.Advertisements
 import com.localbitcoins.pojo.advertisment.Advertisment
 import com.localbitcoins.pojo.advertisment.AdvertismentsData
 import com.localbitcoins.pojo.dashboard.*
+import com.localbitcoins.pojo.fees.Fees
+import com.localbitcoins.pojo.wallet.Wallet
 import org.apache.http.client.utils.URLEncodedUtils
 import java.io.IOException
 import java.net.URI
@@ -76,6 +78,8 @@ class LocalBitcoinsUtils {
                 for (contact in dashboardData.contact!!) {
                     if (contact.data.releasedAt != null && contact.data.isSelling!!) {
                         if (contact.data.contactId == Integer.parseInt(transactionId)) {
+                            // Reverse the transaction list to get them from oldest to newest
+                            contacts.reverse()
                             return contacts
                         }
                         contacts.add(contact)
@@ -88,6 +92,34 @@ class LocalBitcoinsUtils {
                 parameterCollection =
                     ParameterCollection(URLEncodedUtils.parse(URI(nextUrl!!), Charset.forName("UTF-8")))
             }
+        }
+
+        @Throws(IOException::class)
+        fun getWallet(localBitcoinsKey: String, localBitcoinsSecret: String): Wallet {
+            val parameterCollection = ParameterCollection(ArrayList())
+            val request = LocalBitcoinsRequest(
+                localBitcoinsKey,
+                localBitcoinsSecret,
+                LocalBitcoinsRequest.WALLET,
+                parameterCollection,
+                LocalBitcoinsRequest.HttpType.GET
+            )
+            val data = request.pullData()
+            return ObjectMapper().readValue(data, Wallet::class.java)
+        }
+
+        @Throws(IOException::class)
+        fun getFees(localBitcoinsKey: String, localBitcoinsSecret: String): Fees {
+            val parameterCollection = ParameterCollection(ArrayList())
+            val request = LocalBitcoinsRequest(
+                localBitcoinsKey,
+                localBitcoinsSecret,
+                LocalBitcoinsRequest.FEES,
+                parameterCollection,
+                LocalBitcoinsRequest.HttpType.GET
+            )
+            val data = request.pullData()
+            return ObjectMapper().readValue(data, Fees::class.java)
         }
     }
 }
