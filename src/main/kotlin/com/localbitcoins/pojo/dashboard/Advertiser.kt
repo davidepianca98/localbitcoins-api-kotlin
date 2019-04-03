@@ -1,11 +1,12 @@
 package com.localbitcoins.pojo.dashboard
 
 import com.fasterxml.jackson.annotation.*
+import java.io.Serializable
 import java.util.*
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder("username", "feedback_score", "trade_count", "last_online", "name")
-class Advertiser {
+class Advertiser : Serializable {
 
     @JsonProperty("username")
     @get:JsonProperty("username")

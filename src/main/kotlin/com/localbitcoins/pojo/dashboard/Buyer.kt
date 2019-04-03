@@ -1,6 +1,7 @@
 package com.localbitcoins.pojo.dashboard
 
 import com.fasterxml.jackson.annotation.*
+import java.io.Serializable
 import java.util.*
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -14,7 +15,7 @@ import java.util.*
     "real_name",
     "countrycode_by_ip"
 )
-class Buyer {
+class Buyer : Serializable {
 
     @JsonProperty("username")
     @get:JsonProperty("username")
@@ -60,5 +61,17 @@ class Buyer {
     fun setAdditionalProperty(name: String, value: Any?) {
         this.additionalProperties[name] = value
     }
+
+    /*override fun toString(): String {
+        return "Buyer(username=$username,\n" +
+                "feedbackScore=$feedbackScore,\n" +
+                "name=$name,\n" +
+                "lastOnline=$lastOnline,\n" +
+                "countrycodeByPhoneNumber=$countrycodeByPhoneNumber,\n" +
+                "tradeCount=$tradeCount,\n" +
+                "realName=$realName,\n" +
+                "countrycodeByIp=$countrycodeByIp,\n" +
+                "additionalProperties=$additionalProperties)"
+    }*/
 
 }

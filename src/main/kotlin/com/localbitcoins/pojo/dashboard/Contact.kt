@@ -1,11 +1,12 @@
 package com.localbitcoins.pojo.dashboard
 
 import com.fasterxml.jackson.annotation.*
+import java.io.Serializable
 import java.util.*
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder("data", "actions")
-class Contact {
+class Contact : Serializable {
 
     @JsonProperty("data")
     @get:JsonProperty("data")
@@ -28,4 +29,7 @@ class Contact {
         this.additionalProperties[name] = value
     }
 
+    override fun toString(): String {
+        return "Contact(data=$data,actions=$actions,additionalProperties=$additionalProperties)"
+    }
 }

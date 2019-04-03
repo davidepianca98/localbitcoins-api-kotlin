@@ -1,11 +1,12 @@
 package com.localbitcoins.pojo.dashboard
 
 import com.fasterxml.jackson.annotation.*
+import java.io.Serializable
 import java.util.*
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder("message_post_url", "advertisement_url", "messages_url", "release_url", "advertisement_public_view")
-class Actions {
+class Actions : Serializable {
 
     @JsonProperty("message_post_url")
     @get:JsonProperty("message_post_url")
@@ -38,6 +39,15 @@ class Actions {
     @JsonAnySetter
     fun setAdditionalProperty(name: String, value: Any?) {
         this.additionalProperties[name] = value
+    }
+
+    override fun toString(): String {
+        return "Actions(messagePostUrl=$messagePostUrl," +
+                "advertisementUrl=$advertisementUrl," +
+                "messagesUrl=$messagesUrl," +
+                "releaseUrl=$releaseUrl," +
+                "advertisementPublicView=$advertisementPublicView," +
+                "additionalProperties=$additionalProperties)"
     }
 
 }

@@ -6,20 +6,24 @@ import com.localbitcoins.pojo.advertisment.Advertisment
 import com.localbitcoins.pojo.advertisment.AdvertismentsData
 import com.localbitcoins.pojo.dashboard.*
 import com.localbitcoins.pojo.fees.Fees
+import com.localbitcoins.pojo.messages.ContactMessages
 import com.localbitcoins.pojo.wallet.Wallet
 import org.apache.http.client.utils.URLEncodedUtils
+import org.apache.http.message.BasicNameValuePair
 import java.io.IOException
 import java.net.URI
 import java.net.URISyntaxException
 import java.nio.charset.Charset
+import java.time.Instant
 import java.util.*
+import kotlin.collections.ArrayList
 
 class LocalBitcoinsUtils {
 
     companion object {
 
         @Throws(IOException::class)
-        internal fun getAd(adId: Int?, localBitcoinsKey: String, localBitcoinsSecret: String): Advertisment {
+        fun getAd(adId: Int?, localBitcoinsKey: String, localBitcoinsSecret: String): Advertisment {
             val parameterCollection = ParameterCollection(ArrayList())
             val request = LocalBitcoinsRequest(
                 localBitcoinsKey,
@@ -47,7 +51,7 @@ class LocalBitcoinsUtils {
                 LocalBitcoinsRequest.HttpType.GET
             )
             val data = request.pullData()
-
+            println(data)
             val transaction = ObjectMapper().readValue(data, Contact::class.java)
             return transaction.data
         }
@@ -65,7 +69,7 @@ class LocalBitcoinsUtils {
                 val request = LocalBitcoinsRequest(
                     localBitcoinsKey,
                     localBitcoinsSecret,
-                    LocalBitcoinsRequest.CLOSED,
+                    LocalBitcoinsRequest.RELEASED,
                     parameterCollection,
                     LocalBitcoinsRequest.HttpType.GET
                 )
@@ -91,6 +95,93 @@ class LocalBitcoinsUtils {
                 Objects.requireNonNull<String>(nextUrl)
                 parameterCollection =
                     ParameterCollection(URLEncodedUtils.parse(URI(nextUrl!!), Charset.forName("UTF-8")))
+            }
+        }
+
+        @Throws(IOException::class, URISyntaxException::class)
+        fun getTransactionListUntil(
+            date: Date,
+            localBitcoinsKey: String,
+            localBitcoinsSecret: String
+        ): List<Contact> {
+            var parameterCollection = ParameterCollection(ArrayList())
+            val contacts = ArrayList<Contact>()
+
+            while (true) {
+                val request = LocalBitcoinsRequest(
+                    localBitcoinsKey,
+                    localBitcoinsSecret,
+                    LocalBitcoinsRequest.RELEASED,
+                    parameterCollection,
+                    LocalBitcoinsRequest.HttpType.GET
+                )
+                var data: String
+                try {
+                    data = request.pullData()
+                } catch (e: IOException) {
+                    continue
+                }
+
+                val objectMapper = ObjectMapper()
+                val localBitcoinsDashboard = objectMapper.readValue(data, LocalBitcoinsDashboard::class.java)
+                val dashboardData = Objects.requireNonNull<DashboardData>(localBitcoinsDashboard.data)
+                Objects.requireNonNull<List<Contact>>(dashboardData.contact)
+                for (contact in dashboardData.contact!!) {
+                    if (contact.data.isSelling!!) {
+                        if (Date.from(Instant.parse(contact.data.releasedAt!!.replace("+00:00", "Z"))) < date) {
+                            // Reverse the transaction list to get them from oldest to newest
+                            contacts.reverse()
+                            return contacts
+                        }
+                        contacts.add(contact)
+                        println(contact.data.releasedAt)
+                    }
+                }
+                Objects.requireNonNull<Pagination>(localBitcoinsDashboard.pagination)
+                val nextUrl = localBitcoinsDashboard.pagination!!.next
+                Objects.requireNonNull<String>(nextUrl)
+                parameterCollection =
+                    ParameterCollection(URLEncodedUtils.parse(URI(nextUrl!!), Charset.forName("UTF-8")))
+            }
+        }
+
+        @Throws(IOException::class, URISyntaxException::class)
+        fun getOpenTransactions(localBitcoinsKey: String, localBitcoinsSecret: String): List<Contact> {
+            var parameterCollection = ParameterCollection(ArrayList())
+            val contacts = ArrayList<Contact>()
+
+            while (true) {
+                val request = LocalBitcoinsRequest(
+                    localBitcoinsKey,
+                    localBitcoinsSecret,
+                    LocalBitcoinsRequest.DASHBOARD,
+                    parameterCollection,
+                    LocalBitcoinsRequest.HttpType.GET
+                )
+                val data = request.pullData()
+
+                val objectMapper = ObjectMapper()
+                val localBitcoinsDashboard = objectMapper.readValue(data, LocalBitcoinsDashboard::class.java)
+                val dashboardData = Objects.requireNonNull<DashboardData>(localBitcoinsDashboard.data)
+                Objects.requireNonNull<List<Contact>>(dashboardData.contact)
+                for (contact in dashboardData.contact!!) {
+                    if (contact.data.isSelling!!) {
+                        contacts.add(contact)
+                        println(contact.data.createdAt)
+                    }
+                }
+                if (localBitcoinsDashboard.pagination == null) {
+                    // Reverse the transaction list to get them from oldest to newest
+                    contacts.reverse()
+                    return contacts
+                }
+                parameterCollection =
+                    ParameterCollection(
+                        URLEncodedUtils.parse(
+                            URI(localBitcoinsDashboard.pagination!!.next!!),
+                            Charset.forName("UTF-8")
+                        )
+                    )
             }
         }
 
@@ -120,6 +211,69 @@ class LocalBitcoinsUtils {
             )
             val data = request.pullData()
             return ObjectMapper().readValue(data, Fees::class.java)
+        }
+
+        @Throws(IOException::class)
+        fun getContactMessages(
+            localBitcoinsKey: String,
+            localBitcoinsSecret: String,
+            contactId: String
+        ): ContactMessages {
+            val parameterCollection = ParameterCollection(ArrayList())
+            val request = LocalBitcoinsRequest(
+                localBitcoinsKey,
+                localBitcoinsSecret,
+                "/contact_messages/$contactId/",
+                parameterCollection,
+                LocalBitcoinsRequest.HttpType.GET
+            )
+            val data = request.pullData()
+            return ObjectMapper().readValue(data, ContactMessages::class.java)
+        }
+
+        @Throws(IOException::class)
+        fun contactMessagePost(
+            localBitcoinsKey: String,
+            localBitcoinsSecret: String,
+            contactId: String,
+            message: String
+        ): String {
+            val parameterCollection = ParameterCollection(ArrayList())
+            parameterCollection.add(BasicNameValuePair("msg", message))
+            val request = LocalBitcoinsRequest(
+                localBitcoinsKey,
+                localBitcoinsSecret,
+                "/contact_message_post/$contactId/",
+                parameterCollection,
+                LocalBitcoinsRequest.HttpType.POST
+            )
+            return request.pullData()
+        }
+
+        @Throws(IOException::class)
+        fun contactRelease(localBitcoinsKey: String, localBitcoinsSecret: String, contactId: String): String {
+            val parameterCollection = ParameterCollection(ArrayList())
+            val request = LocalBitcoinsRequest(
+                localBitcoinsKey,
+                localBitcoinsSecret,
+                "/contact_release/$contactId/",
+                parameterCollection,
+                LocalBitcoinsRequest.HttpType.POST
+            )
+            return request.pullData()
+        }
+
+        @Throws(IOException::class)
+        fun getAccountInfo(localBitcoinsKey: String, localBitcoinsSecret: String, username: String): String {
+            val parameterCollection = ParameterCollection(ArrayList())
+            val request = LocalBitcoinsRequest(
+                localBitcoinsKey,
+                localBitcoinsSecret,
+                "/account_info/$username/",
+                parameterCollection,
+                LocalBitcoinsRequest.HttpType.GET
+            )
+            return request.pullData()
         }
     }
 }

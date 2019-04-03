@@ -1,6 +1,7 @@
 package com.localbitcoins.pojo.dashboard
 
 import com.fasterxml.jackson.annotation.*
+import java.io.Serializable
 import java.util.*
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -26,7 +27,7 @@ import java.util.*
     "payment_completed_at",
     "released_at"
 )
-class ContactData {
+class ContactData : Serializable {
 
     @JsonProperty("exchange_rate_updated_at")
     @get:JsonProperty("exchange_rate_updated_at")
@@ -122,7 +123,26 @@ class ContactData {
     }
 
     override fun toString(): String {
-        return "ContactData(additionalProperties=$additionalProperties)"
+        return "ContactData(exchange_rate_updated_at=$exchangeRateUpdatedAt,\n" +
+                "advertisement=$advertisement,\n" +
+                "is_buying=$isBuying,\n" +
+                "created_at=$createdAt,\n" +
+                "reference_code=$referenceCode,\n" +
+                "contact_id=$contactId,\n" +
+                "seller=$seller,\n" +
+                "currency=$currency,\n" +
+                "amount=$amount,\n" +
+                "is_selling=$isSelling,\n" +
+                "escrowed_at=$escrowedAt,\n" +
+                "amount_btc=$amountBtc,\n" +
+                "canceled_at=$canceledAt,\n" +
+                "buyer=$buyer,\n" +
+                "closed_at=$closedAt,\n" +
+                "funded_at=$fundedAt,\n" +
+                "account_info=$accountInfo,\n" +
+                "fee_btc=$feeBtc,\n" +
+                "payment_completed_at=$paymentCompletedAt,\n" +
+                "released_at=$releasedAt,\n" +
+                "additionalProperties=$additionalProperties)"
     }
-
 }
