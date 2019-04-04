@@ -1,31 +1,12 @@
 package com.localbitcoins.pojo.dashboard
 
-import com.fasterxml.jackson.annotation.*
-import java.util.*
+import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.annotation.JsonProperty
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder("contact_list", "contact_count")
-class DashboardData {
-
+data class DashboardData (
     @JsonProperty("contact_list")
-    @get:JsonProperty("contact_list")
-    @set:JsonProperty("contact_list")
-    var contact: List<Contact>? = null
+    val contact: List<Contact>,
     @JsonProperty("contact_count")
-    @get:JsonProperty("contact_count")
-    @set:JsonProperty("contact_count")
-    var contactCount: Int? = null
-    @JsonIgnore
-    private val additionalProperties = HashMap<String, Any?>()
-
-    @JsonAnyGetter
-    fun getAdditionalProperties(): Map<String, Any?> {
-        return this.additionalProperties
-    }
-
-    @JsonAnySetter
-    fun setAdditionalProperty(name: String, value: Any?) {
-        this.additionalProperties[name] = value
-    }
-
-}
+    val contactCount: Int
+)

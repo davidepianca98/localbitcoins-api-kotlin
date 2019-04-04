@@ -1,35 +1,14 @@
 package com.localbitcoins.pojo.advertisment
 
-import com.fasterxml.jackson.annotation.*
-import java.util.*
+import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.annotation.JsonProperty
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder("html_form", "public_view", "change_form")
-class Actions {
-
+data class Actions (
     @JsonProperty("html_form")
-    @get:JsonProperty("html_form")
-    @set:JsonProperty("html_form")
-    var htmlForm: String? = null
+    val htmlForm: String?,
     @JsonProperty("public_view")
-    @get:JsonProperty("public_view")
-    @set:JsonProperty("public_view")
-    var publicView: String? = null
+    val publicView: String?,
     @JsonProperty("change_form")
-    @get:JsonProperty("change_form")
-    @set:JsonProperty("change_form")
-    var changeForm: String? = null
-    @JsonIgnore
-    private val additionalProperties = HashMap<String, Any?>()
-
-    @JsonAnyGetter
-    fun getAdditionalProperties(): Map<String, Any?> {
-        return this.additionalProperties
-    }
-
-    @JsonAnySetter
-    fun setAdditionalProperty(name: String, value: Any?) {
-        this.additionalProperties[name] = value
-    }
-
-}
+    val changeForm: String?
+)

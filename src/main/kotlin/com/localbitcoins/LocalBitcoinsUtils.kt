@@ -1,10 +1,14 @@
 package com.localbitcoins
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.KotlinModule
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.localbitcoins.pojo.advertisment.Advertisements
 import com.localbitcoins.pojo.advertisment.Advertisment
-import com.localbitcoins.pojo.advertisment.AdvertismentsData
-import com.localbitcoins.pojo.dashboard.*
+import com.localbitcoins.pojo.dashboard.Contact
+import com.localbitcoins.pojo.dashboard.ContactData
+import com.localbitcoins.pojo.dashboard.DashboardData
+import com.localbitcoins.pojo.dashboard.LocalBitcoinsDashboard
 import com.localbitcoins.pojo.fees.Fees
 import com.localbitcoins.pojo.messages.ContactMessages
 import com.localbitcoins.pojo.wallet.Wallet
@@ -14,7 +18,6 @@ import java.io.IOException
 import java.net.URI
 import java.net.URISyntaxException
 import java.nio.charset.Charset
-import java.time.Instant
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -34,10 +37,8 @@ class LocalBitcoinsUtils {
             )
             val data = request.pullData()
 
-            val advertisements = ObjectMapper().readValue(data, Advertisements::class.java)
-            Objects.requireNonNull<AdvertismentsData>(advertisements.advertismentsData)
-            Objects.requireNonNull<List<Advertisment>>(advertisements.advertismentsData!!.advertisment)
-            return advertisements.advertismentsData!!.advertisment!![0]
+            val advertisements = ObjectMapper().registerModule(KotlinModule()).readValue<Advertisements>(data)
+            return advertisements.advertismentsData.advertismentList[0]
         }
 
         @Throws(IOException::class)
@@ -51,8 +52,7 @@ class LocalBitcoinsUtils {
                 LocalBitcoinsRequest.HttpType.GET
             )
             val data = request.pullData()
-            println(data)
-            val transaction = ObjectMapper().readValue(data, Contact::class.java)
+            val transaction = ObjectMapper().registerModule(KotlinModule()).readValue<Contact>(data)
             return transaction.data
         }
 
@@ -75,12 +75,11 @@ class LocalBitcoinsUtils {
                 )
                 val data = request.pullData()
 
-                val objectMapper = ObjectMapper()
-                val localBitcoinsDashboard = objectMapper.readValue(data, LocalBitcoinsDashboard::class.java)
+                val localBitcoinsDashboard = ObjectMapper().registerModule(KotlinModule()).readValue<LocalBitcoinsDashboard>(data)
                 val dashboardData = Objects.requireNonNull<DashboardData>(localBitcoinsDashboard.data)
                 Objects.requireNonNull<List<Contact>>(dashboardData.contact)
-                for (contact in dashboardData.contact!!) {
-                    if (contact.data.releasedAt != null && contact.data.isSelling!!) {
+                for (contact in dashboardData.contact) {
+                    if (contact.data.releasedAt != null && contact.data.isSelling) {
                         if (contact.data.contactId == Integer.parseInt(transactionId)) {
                             // Reverse the transaction list to get them from oldest to newest
                             contacts.reverse()
@@ -90,11 +89,9 @@ class LocalBitcoinsUtils {
                         println(contact.data.releasedAt)
                     }
                 }
-                Objects.requireNonNull<Pagination>(localBitcoinsDashboard.pagination)
-                val nextUrl = localBitcoinsDashboard.pagination!!.next
-                Objects.requireNonNull<String>(nextUrl)
+                val nextUrl = localBitcoinsDashboard.pagination!!.next!!
                 parameterCollection =
-                    ParameterCollection(URLEncodedUtils.parse(URI(nextUrl!!), Charset.forName("UTF-8")))
+                    ParameterCollection(URLEncodedUtils.parse(URI(nextUrl), Charset.forName("UTF-8")))
             }
         }
 
@@ -122,13 +119,12 @@ class LocalBitcoinsUtils {
                     continue
                 }
 
-                val objectMapper = ObjectMapper()
-                val localBitcoinsDashboard = objectMapper.readValue(data, LocalBitcoinsDashboard::class.java)
+                val localBitcoinsDashboard = ObjectMapper().registerModule(KotlinModule()).readValue<LocalBitcoinsDashboard>(data)
                 val dashboardData = Objects.requireNonNull<DashboardData>(localBitcoinsDashboard.data)
                 Objects.requireNonNull<List<Contact>>(dashboardData.contact)
-                for (contact in dashboardData.contact!!) {
-                    if (contact.data.isSelling!!) {
-                        if (Date.from(Instant.parse(contact.data.releasedAt!!.replace("+00:00", "Z"))) < date) {
+                for (contact in dashboardData.contact) {
+                    if (contact.data.isSelling) {
+                        if (contact.data.releasedAt!! < date) {
                             // Reverse the transaction list to get them from oldest to newest
                             contacts.reverse()
                             return contacts
@@ -137,11 +133,9 @@ class LocalBitcoinsUtils {
                         println(contact.data.releasedAt)
                     }
                 }
-                Objects.requireNonNull<Pagination>(localBitcoinsDashboard.pagination)
-                val nextUrl = localBitcoinsDashboard.pagination!!.next
-                Objects.requireNonNull<String>(nextUrl)
+                val nextUrl = localBitcoinsDashboard.pagination!!.next!!
                 parameterCollection =
-                    ParameterCollection(URLEncodedUtils.parse(URI(nextUrl!!), Charset.forName("UTF-8")))
+                    ParameterCollection(URLEncodedUtils.parse(URI(nextUrl), Charset.forName("UTF-8")))
             }
         }
 
@@ -160,17 +154,16 @@ class LocalBitcoinsUtils {
                 )
                 val data = request.pullData()
 
-                val objectMapper = ObjectMapper()
-                val localBitcoinsDashboard = objectMapper.readValue(data, LocalBitcoinsDashboard::class.java)
+                val localBitcoinsDashboard = ObjectMapper().registerModule(KotlinModule()).readValue<LocalBitcoinsDashboard>(data)
                 val dashboardData = Objects.requireNonNull<DashboardData>(localBitcoinsDashboard.data)
                 Objects.requireNonNull<List<Contact>>(dashboardData.contact)
-                for (contact in dashboardData.contact!!) {
-                    if (contact.data.isSelling!!) {
+                for (contact in dashboardData.contact) {
+                    if (contact.data.isSelling) {
                         contacts.add(contact)
                         println(contact.data.createdAt)
                     }
                 }
-                if (localBitcoinsDashboard.pagination == null) {
+                if (localBitcoinsDashboard.pagination!!.next == null) {
                     // Reverse the transaction list to get them from oldest to newest
                     contacts.reverse()
                     return contacts
@@ -178,7 +171,7 @@ class LocalBitcoinsUtils {
                 parameterCollection =
                     ParameterCollection(
                         URLEncodedUtils.parse(
-                            URI(localBitcoinsDashboard.pagination!!.next!!),
+                            URI(localBitcoinsDashboard.pagination.next),
                             Charset.forName("UTF-8")
                         )
                     )
@@ -196,7 +189,7 @@ class LocalBitcoinsUtils {
                 LocalBitcoinsRequest.HttpType.GET
             )
             val data = request.pullData()
-            return ObjectMapper().readValue(data, Wallet::class.java)
+            return ObjectMapper().registerModule(KotlinModule()).readValue(data)
         }
 
         @Throws(IOException::class)
@@ -210,7 +203,7 @@ class LocalBitcoinsUtils {
                 LocalBitcoinsRequest.HttpType.GET
             )
             val data = request.pullData()
-            return ObjectMapper().readValue(data, Fees::class.java)
+            return ObjectMapper().registerModule(KotlinModule()).readValue(data)
         }
 
         @Throws(IOException::class)
@@ -228,7 +221,7 @@ class LocalBitcoinsUtils {
                 LocalBitcoinsRequest.HttpType.GET
             )
             val data = request.pullData()
-            return ObjectMapper().readValue(data, ContactMessages::class.java)
+            return ObjectMapper().registerModule(KotlinModule()).readValue(data)
         }
 
         @Throws(IOException::class)
