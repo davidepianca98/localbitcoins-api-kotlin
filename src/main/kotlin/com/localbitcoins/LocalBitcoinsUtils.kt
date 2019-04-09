@@ -1,5 +1,7 @@
 package com.localbitcoins
 
+import com.fasterxml.jackson.core.JsonParseException
+import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -7,7 +9,6 @@ import com.localbitcoins.pojo.advertisment.Advertisements
 import com.localbitcoins.pojo.advertisment.Advertisment
 import com.localbitcoins.pojo.dashboard.Contact
 import com.localbitcoins.pojo.dashboard.ContactData
-import com.localbitcoins.pojo.dashboard.DashboardData
 import com.localbitcoins.pojo.dashboard.LocalBitcoinsDashboard
 import com.localbitcoins.pojo.fees.Fees
 import com.localbitcoins.pojo.messages.ContactMessages
@@ -25,7 +26,7 @@ class LocalBitcoinsUtils {
 
     companion object {
 
-        @Throws(IOException::class)
+        @Throws(JsonParseException::class, JsonMappingException::class, IOException::class)
         fun getAd(adId: Int?, localBitcoinsKey: String, localBitcoinsSecret: String): Advertisment {
             val parameterCollection = ParameterCollection(ArrayList())
             val request = LocalBitcoinsRequest(
@@ -41,7 +42,7 @@ class LocalBitcoinsUtils {
             return advertisements.advertismentsData.advertismentList[0]
         }
 
-        @Throws(IOException::class)
+        @Throws(JsonParseException::class, JsonMappingException::class, IOException::class)
         fun getTransaction(transactionId: String, localBitcoinsKey: String, localBitcoinsSecret: String): ContactData {
             val parameterCollection = ParameterCollection(ArrayList())
             val request = LocalBitcoinsRequest(
@@ -56,7 +57,7 @@ class LocalBitcoinsUtils {
             return transaction.data
         }
 
-        @Throws(IOException::class, URISyntaxException::class)
+        @Throws(URISyntaxException::class, JsonParseException::class, JsonMappingException::class, IOException::class)
         fun getTransactionListUntil(
             transactionId: String,
             localBitcoinsKey: String,
@@ -76,9 +77,7 @@ class LocalBitcoinsUtils {
                 val data = request.pullData()
 
                 val localBitcoinsDashboard = ObjectMapper().registerModule(KotlinModule()).readValue<LocalBitcoinsDashboard>(data)
-                val dashboardData = Objects.requireNonNull<DashboardData>(localBitcoinsDashboard.data)
-                Objects.requireNonNull<List<Contact>>(dashboardData.contact)
-                for (contact in dashboardData.contact) {
+                for (contact in localBitcoinsDashboard.data.contact) {
                     if (contact.data.releasedAt != null && contact.data.isSelling) {
                         if (contact.data.contactId == Integer.parseInt(transactionId)) {
                             // Reverse the transaction list to get them from oldest to newest
@@ -95,7 +94,7 @@ class LocalBitcoinsUtils {
             }
         }
 
-        @Throws(IOException::class, URISyntaxException::class)
+        @Throws(URISyntaxException::class, JsonParseException::class, JsonMappingException::class, IOException::class)
         fun getTransactionListUntil(
             date: Date,
             localBitcoinsKey: String,
@@ -120,9 +119,7 @@ class LocalBitcoinsUtils {
                 }
 
                 val localBitcoinsDashboard = ObjectMapper().registerModule(KotlinModule()).readValue<LocalBitcoinsDashboard>(data)
-                val dashboardData = Objects.requireNonNull<DashboardData>(localBitcoinsDashboard.data)
-                Objects.requireNonNull<List<Contact>>(dashboardData.contact)
-                for (contact in dashboardData.contact) {
+                for (contact in localBitcoinsDashboard.data.contact) {
                     if (contact.data.isSelling) {
                         if (contact.data.releasedAt!! < date) {
                             // Reverse the transaction list to get them from oldest to newest
@@ -139,7 +136,7 @@ class LocalBitcoinsUtils {
             }
         }
 
-        @Throws(IOException::class, URISyntaxException::class)
+        @Throws(URISyntaxException::class, JsonParseException::class, JsonMappingException::class, IOException::class)
         fun getOpenTransactions(localBitcoinsKey: String, localBitcoinsSecret: String): List<Contact> {
             var parameterCollection = ParameterCollection(ArrayList())
             val contacts = ArrayList<Contact>()
@@ -155,15 +152,13 @@ class LocalBitcoinsUtils {
                 val data = request.pullData()
 
                 val localBitcoinsDashboard = ObjectMapper().registerModule(KotlinModule()).readValue<LocalBitcoinsDashboard>(data)
-                val dashboardData = Objects.requireNonNull<DashboardData>(localBitcoinsDashboard.data)
-                Objects.requireNonNull<List<Contact>>(dashboardData.contact)
-                for (contact in dashboardData.contact) {
+                for (contact in localBitcoinsDashboard.data.contact) {
                     if (contact.data.isSelling) {
                         contacts.add(contact)
                         println(contact.data.createdAt)
                     }
                 }
-                if (localBitcoinsDashboard.pagination!!.next == null) {
+                if (localBitcoinsDashboard.pagination?.next == null) {
                     // Reverse the transaction list to get them from oldest to newest
                     contacts.reverse()
                     return contacts
@@ -178,7 +173,7 @@ class LocalBitcoinsUtils {
             }
         }
 
-        @Throws(IOException::class)
+        @Throws(JsonParseException::class, JsonMappingException::class, IOException::class)
         fun getWallet(localBitcoinsKey: String, localBitcoinsSecret: String): Wallet {
             val parameterCollection = ParameterCollection(ArrayList())
             val request = LocalBitcoinsRequest(
@@ -192,7 +187,7 @@ class LocalBitcoinsUtils {
             return ObjectMapper().registerModule(KotlinModule()).readValue(data)
         }
 
-        @Throws(IOException::class)
+        @Throws(JsonParseException::class, JsonMappingException::class, IOException::class)
         fun getFees(localBitcoinsKey: String, localBitcoinsSecret: String): Fees {
             val parameterCollection = ParameterCollection(ArrayList())
             val request = LocalBitcoinsRequest(
@@ -206,7 +201,7 @@ class LocalBitcoinsUtils {
             return ObjectMapper().registerModule(KotlinModule()).readValue(data)
         }
 
-        @Throws(IOException::class)
+        @Throws(JsonParseException::class, JsonMappingException::class, IOException::class)
         fun getContactMessages(
             localBitcoinsKey: String,
             localBitcoinsSecret: String,
