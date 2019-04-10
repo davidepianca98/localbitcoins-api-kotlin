@@ -14,6 +14,8 @@ data class Actions (
     val messagesUrl: String?,
     @JsonProperty("release_url")
     val releaseUrl: String?,
+    @JsonProperty("dispute_url")
+    val disputeUrl: String?,
     @JsonProperty("advertisement_public_view")
     val advertisementPublicView: String?
 ): Serializable

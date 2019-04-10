@@ -160,7 +160,7 @@ class LocalBitcoinsUtils {
                 }
                 if (localBitcoinsDashboard.pagination?.next == null) {
                     // Reverse the transaction list to get them from oldest to newest
-                    contacts.reverse()
+                    // contacts.reverse() // TODO check
                     return contacts
                 }
                 parameterCollection =
