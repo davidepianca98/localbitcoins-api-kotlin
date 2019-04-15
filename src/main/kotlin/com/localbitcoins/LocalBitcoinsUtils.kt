@@ -155,7 +155,6 @@ class LocalBitcoinsUtils {
                 for (contact in localBitcoinsDashboard.data.contact) {
                     if (contact.data.isSelling) {
                         contacts.add(contact)
-                        println(contact.data.createdAt)
                     }
                 }
                 if (localBitcoinsDashboard.pagination?.next == null) {

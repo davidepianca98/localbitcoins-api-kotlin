@@ -12,5 +12,11 @@ data class MessageList (
     @JsonProperty("is_admin")
     val isAdmin: Boolean,
     @JsonProperty("sender")
-    val sender: Sender
+    val sender: Sender,
+    @JsonProperty("attachment_name")
+    val attachmentName: String?,
+    @JsonProperty("attachment_type")
+    val attachmentType: String?,
+    @JsonProperty("attachment_url")
+    val attachmentUrl: String?
 )
