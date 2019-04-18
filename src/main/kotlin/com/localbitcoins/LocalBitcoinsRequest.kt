@@ -1,6 +1,5 @@
 package com.localbitcoins
 
-import org.apache.http.HttpResponse
 import org.apache.http.NameValuePair
 import org.apache.http.client.entity.UrlEncodedFormEntity
 import org.apache.http.client.methods.*
@@ -19,8 +18,8 @@ class LocalBitcoinsRequest(
 ) {
     private val path: String = if (path.startsWith("/api")) path else "/api$path"
 
-    private val content: HttpResponse?
-        get() {
+    @Throws(IOException::class)
+    fun get(): String {
             Objects.requireNonNull<List<NameValuePair>>(parameters.getParameters())
             val client = HttpClientBuilder.create().build()
             val form = UrlEncodedFormEntity(parameters.getParameters(), "UTF-8")
@@ -38,22 +37,20 @@ class LocalBitcoinsRequest(
                 HttpType.DELETE -> base = HttpDelete(constructUrl())
                 HttpType.PUT -> base = HttpPut(constructUrl())
             }
-            val nonce = (System.currentTimeMillis() * 1000).toString()
+        val nonce = ((System.currentTimeMillis() * 1000) + 2000).toString()
             val signature = HMACSignature(localBitcoinsKey, localBitcoinsSecret, this.path, parametersString, nonce).toString()
             base.addHeader("Content-Type", "application/x-www-form-urlencoded")
             base.addHeader("Apiauth-Key", localBitcoinsKey)
             base.addHeader("Apiauth-Nonce", nonce)
             base.addHeader("Apiauth-Signature", signature)
-            return client.execute(base)
+        val response = client.execute(base)
+        if (response.statusLine.statusCode != 200)
+            throw IOException(response.statusLine.statusCode.toString())
+        return BufferedReader(InputStreamReader(response.entity.content)).use(BufferedReader::readText)
         }
 
     enum class HttpType {
         GET, POST, DELETE, PUT
-    }
-
-    @Throws(IOException::class)
-    fun pullData(): String {
-        return BufferedReader(InputStreamReader(content!!.entity.content)).use(BufferedReader::readText)
     }
 
     private fun constructUrl(): String {

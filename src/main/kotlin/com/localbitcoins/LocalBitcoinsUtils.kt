@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
+import com.localbitcoins.pojo.accountinfo.AccountInfo
 import com.localbitcoins.pojo.advertisment.Advertisements
 import com.localbitcoins.pojo.advertisment.Advertisment
 import com.localbitcoins.pojo.dashboard.Contact
@@ -36,7 +37,7 @@ class LocalBitcoinsUtils {
                 parameterCollection,
                 LocalBitcoinsRequest.HttpType.GET
             )
-            val data = request.pullData()
+            val data = request.get()
 
             val advertisements = ObjectMapper().registerModule(KotlinModule()).readValue<Advertisements>(data)
             return advertisements.advertismentsData.advertismentList[0]
@@ -52,7 +53,7 @@ class LocalBitcoinsUtils {
                 parameterCollection,
                 LocalBitcoinsRequest.HttpType.GET
             )
-            val data = request.pullData()
+            val data = request.get()
             val transaction = ObjectMapper().registerModule(KotlinModule()).readValue<Contact>(data)
             return transaction.data
         }
@@ -74,7 +75,7 @@ class LocalBitcoinsUtils {
                     parameterCollection,
                     LocalBitcoinsRequest.HttpType.GET
                 )
-                val data = request.pullData()
+                val data = request.get()
 
                 val localBitcoinsDashboard = ObjectMapper().registerModule(KotlinModule()).readValue<LocalBitcoinsDashboard>(data)
                 for (contact in localBitcoinsDashboard.data.contact) {
@@ -113,7 +114,7 @@ class LocalBitcoinsUtils {
                 )
                 var data: String
                 try {
-                    data = request.pullData()
+                    data = request.get()
                 } catch (e: IOException) {
                     continue
                 }
@@ -149,7 +150,7 @@ class LocalBitcoinsUtils {
                     parameterCollection,
                     LocalBitcoinsRequest.HttpType.GET
                 )
-                val data = request.pullData()
+                val data = request.get()
 
                 val localBitcoinsDashboard = ObjectMapper().registerModule(KotlinModule()).readValue<LocalBitcoinsDashboard>(data)
                 for (contact in localBitcoinsDashboard.data.contact) {
@@ -182,7 +183,7 @@ class LocalBitcoinsUtils {
                 parameterCollection,
                 LocalBitcoinsRequest.HttpType.GET
             )
-            val data = request.pullData()
+            val data = request.get()
             return ObjectMapper().registerModule(KotlinModule()).readValue(data)
         }
 
@@ -196,7 +197,7 @@ class LocalBitcoinsUtils {
                 parameterCollection,
                 LocalBitcoinsRequest.HttpType.GET
             )
-            val data = request.pullData()
+            val data = request.get()
             return ObjectMapper().registerModule(KotlinModule()).readValue(data)
         }
 
@@ -214,7 +215,7 @@ class LocalBitcoinsUtils {
                 parameterCollection,
                 LocalBitcoinsRequest.HttpType.GET
             )
-            val data = request.pullData()
+            val data = request.get()
             return ObjectMapper().registerModule(KotlinModule()).readValue(data)
         }
 
@@ -234,7 +235,7 @@ class LocalBitcoinsUtils {
                 parameterCollection,
                 LocalBitcoinsRequest.HttpType.POST
             )
-            return request.pullData()
+            return request.get()
         }
 
         @Throws(IOException::class)
@@ -247,11 +248,11 @@ class LocalBitcoinsUtils {
                 parameterCollection,
                 LocalBitcoinsRequest.HttpType.POST
             )
-            return request.pullData()
+            return request.get()
         }
 
         @Throws(IOException::class)
-        fun getAccountInfo(localBitcoinsKey: String, localBitcoinsSecret: String, username: String): String {
+        fun getAccountInfo(localBitcoinsKey: String, localBitcoinsSecret: String, username: String): AccountInfo {
             val parameterCollection = ParameterCollection(ArrayList())
             val request = LocalBitcoinsRequest(
                 localBitcoinsKey,
@@ -260,7 +261,7 @@ class LocalBitcoinsUtils {
                 parameterCollection,
                 LocalBitcoinsRequest.HttpType.GET
             )
-            return request.pullData()
+            return ObjectMapper().registerModule(KotlinModule()).readValue(request.get())
         }
     }
 }
