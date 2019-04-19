@@ -9,7 +9,7 @@ data class Data(
     @JsonProperty("username")
     val username: String,
     @JsonProperty("feedback_score")
-    val feedbackScore: Int,
+    val feedbackScore: String,
     @JsonProperty("feedback_count")
     val feedbackCount: Int,
     @JsonProperty("real_name_verifications_trusted")
