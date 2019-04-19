@@ -27,6 +27,8 @@ class LocalBitcoinsUtils {
 
     companion object {
 
+        private val objectMapper = ObjectMapper().registerModule(KotlinModule())
+
         @Throws(JsonParseException::class, JsonMappingException::class, IOException::class)
         fun getAd(adId: Int?, localBitcoinsKey: String, localBitcoinsSecret: String): Advertisment {
             val parameterCollection = ParameterCollection(ArrayList())
@@ -39,7 +41,7 @@ class LocalBitcoinsUtils {
             )
             val data = request.get()
 
-            val advertisements = ObjectMapper().registerModule(KotlinModule()).readValue<Advertisements>(data)
+            val advertisements = objectMapper.readValue<Advertisements>(data)
             return advertisements.advertismentsData.advertismentList[0]
         }
 
@@ -54,7 +56,7 @@ class LocalBitcoinsUtils {
                 LocalBitcoinsRequest.HttpType.GET
             )
             val data = request.get()
-            val transaction = ObjectMapper().registerModule(KotlinModule()).readValue<Contact>(data)
+            val transaction = objectMapper.readValue<Contact>(data)
             return transaction.data
         }
 
@@ -77,7 +79,7 @@ class LocalBitcoinsUtils {
                 )
                 val data = request.get()
 
-                val localBitcoinsDashboard = ObjectMapper().registerModule(KotlinModule()).readValue<LocalBitcoinsDashboard>(data)
+                val localBitcoinsDashboard = objectMapper.readValue<LocalBitcoinsDashboard>(data)
                 for (contact in localBitcoinsDashboard.data.contact) {
                     if (contact.data.releasedAt != null && contact.data.isSelling) {
                         if (contact.data.contactId == Integer.parseInt(transactionId)) {
@@ -119,7 +121,7 @@ class LocalBitcoinsUtils {
                     continue
                 }
 
-                val localBitcoinsDashboard = ObjectMapper().registerModule(KotlinModule()).readValue<LocalBitcoinsDashboard>(data)
+                val localBitcoinsDashboard = objectMapper.readValue<LocalBitcoinsDashboard>(data)
                 for (contact in localBitcoinsDashboard.data.contact) {
                     if (contact.data.isSelling) {
                         if (contact.data.releasedAt!! < date) {
@@ -152,7 +154,7 @@ class LocalBitcoinsUtils {
                 )
                 val data = request.get()
 
-                val localBitcoinsDashboard = ObjectMapper().registerModule(KotlinModule()).readValue<LocalBitcoinsDashboard>(data)
+                val localBitcoinsDashboard = objectMapper.readValue<LocalBitcoinsDashboard>(data)
                 for (contact in localBitcoinsDashboard.data.contact) {
                     if (contact.data.isSelling) {
                         contacts.add(contact)
@@ -184,7 +186,7 @@ class LocalBitcoinsUtils {
                 LocalBitcoinsRequest.HttpType.GET
             )
             val data = request.get()
-            return ObjectMapper().registerModule(KotlinModule()).readValue(data)
+            return objectMapper.readValue(data)
         }
 
         @Throws(JsonParseException::class, JsonMappingException::class, IOException::class)
@@ -198,7 +200,7 @@ class LocalBitcoinsUtils {
                 LocalBitcoinsRequest.HttpType.GET
             )
             val data = request.get()
-            return ObjectMapper().registerModule(KotlinModule()).readValue(data)
+            return objectMapper.readValue(data)
         }
 
         @Throws(JsonParseException::class, JsonMappingException::class, IOException::class)
@@ -216,7 +218,7 @@ class LocalBitcoinsUtils {
                 LocalBitcoinsRequest.HttpType.GET
             )
             val data = request.get()
-            return ObjectMapper().registerModule(KotlinModule()).readValue(data)
+            return objectMapper.readValue(data)
         }
 
         @Throws(IOException::class)
@@ -261,7 +263,7 @@ class LocalBitcoinsUtils {
                 parameterCollection,
                 LocalBitcoinsRequest.HttpType.GET
             )
-            return ObjectMapper().registerModule(KotlinModule()).readValue(request.get())
+            return objectMapper.readValue(request.get())
         }
     }
 }
