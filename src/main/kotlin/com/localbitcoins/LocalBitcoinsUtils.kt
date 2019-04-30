@@ -9,7 +9,6 @@ import com.localbitcoins.pojo.accountinfo.AccountInfo
 import com.localbitcoins.pojo.advertisment.Advertisements
 import com.localbitcoins.pojo.advertisment.Advertisment
 import com.localbitcoins.pojo.dashboard.Contact
-import com.localbitcoins.pojo.dashboard.ContactData
 import com.localbitcoins.pojo.dashboard.LocalBitcoinsDashboard
 import com.localbitcoins.pojo.fees.Fees
 import com.localbitcoins.pojo.messages.ContactMessages
@@ -46,7 +45,7 @@ class LocalBitcoinsUtils {
         }
 
         @Throws(JsonParseException::class, JsonMappingException::class, IOException::class)
-        fun getTransaction(transactionId: String, localBitcoinsKey: String, localBitcoinsSecret: String): ContactData {
+        fun getTransaction(transactionId: String, localBitcoinsKey: String, localBitcoinsSecret: String): Contact {
             val parameterCollection = ParameterCollection(ArrayList())
             val request = LocalBitcoinsRequest(
                 localBitcoinsKey,
@@ -56,8 +55,7 @@ class LocalBitcoinsUtils {
                 LocalBitcoinsRequest.HttpType.GET
             )
             val data = request.get()
-            val transaction = objectMapper.readValue<Contact>(data)
-            return transaction.data
+            return objectMapper.readValue(data)
         }
 
         @Throws(URISyntaxException::class, JsonParseException::class, JsonMappingException::class, IOException::class)

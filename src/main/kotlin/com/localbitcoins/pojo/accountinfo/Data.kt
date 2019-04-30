@@ -30,6 +30,8 @@ data class Data(
     val feedbacksUnconfirmedCount: Int,
     @JsonProperty("blocked_count")
     val blockedCount: Int,
+    @JsonProperty("my_feedback")
+    val myFeedback: String?,
     @JsonProperty("trade_volume_text")
     val tradeVolumeText: String,
     @JsonProperty("has_common_trades")
