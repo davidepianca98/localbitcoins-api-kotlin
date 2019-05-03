@@ -18,11 +18,11 @@ data class Profile (
     @JsonProperty("trade_count")
     val tradeCount: String,
     @JsonProperty("countrycode_by_phone_number")
-    val countrycodeByPhoneNumber: String?,
+    val countrycodeByPhoneNumber: String? = null,
     @JsonProperty("real_name")
-    val realName: String?,
+    val realName: String? = null,
     @JsonProperty("countrycode_by_ip")
-    val countrycodeByIp: String?,
+    val countrycodeByIp: String? = null,
     @JsonProperty("company_name")
-    val companyName: String?
+    val companyName: String? = null
 ): Serializable

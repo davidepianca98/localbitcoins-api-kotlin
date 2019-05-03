@@ -8,5 +8,5 @@ data class Data (
     @JsonProperty("message_count")
     val messageCount: Int,
     @JsonProperty("message_list")
-    val messageList: List<MessageList>
+    val messageList: List<Message>
 )

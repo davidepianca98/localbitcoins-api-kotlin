@@ -31,7 +31,7 @@ data class Data(
     @JsonProperty("blocked_count")
     val blockedCount: Int,
     @JsonProperty("my_feedback")
-    val myFeedback: String?,
+    val myFeedback: String? = null,
     @JsonProperty("trade_volume_text")
     val tradeVolumeText: String,
     @JsonProperty("has_common_trades")

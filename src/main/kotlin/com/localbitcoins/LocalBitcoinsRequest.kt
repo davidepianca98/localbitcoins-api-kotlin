@@ -1,13 +1,11 @@
 package com.localbitcoins
 
-import org.apache.http.NameValuePair
 import org.apache.http.client.entity.UrlEncodedFormEntity
 import org.apache.http.client.methods.*
 import org.apache.http.impl.client.HttpClientBuilder
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
-import java.util.*
 
 class LocalBitcoinsRequest(
     private val localBitcoinsKey: String,
@@ -18,9 +16,8 @@ class LocalBitcoinsRequest(
 ) {
     private val path: String = if (path.startsWith("/api")) path else "/api$path"
 
-    @Throws(IOException::class)
+    @Throws(IOException::class, LocalbitcoinsAPIException::class)
     fun get(): String {
-            Objects.requireNonNull<List<NameValuePair>>(parameters.getParameters())
             val client = HttpClientBuilder.create().build()
             val form = UrlEncodedFormEntity(parameters.getParameters(), "UTF-8")
             val inputStream = BufferedReader(InputStreamReader(form.content))
@@ -45,7 +42,7 @@ class LocalBitcoinsRequest(
             base.addHeader("Apiauth-Signature", signature)
         val response = client.execute(base)
         if (response.statusLine.statusCode != 200)
-            throw IOException(response.statusLine.statusCode.toString())
+            throw LocalbitcoinsAPIException(response.statusLine.statusCode.toString() + " " + response.statusLine.reasonPhrase + " " + path + " " + form.content)
         return BufferedReader(InputStreamReader(response.entity.content)).use(BufferedReader::readText)
         }
 
