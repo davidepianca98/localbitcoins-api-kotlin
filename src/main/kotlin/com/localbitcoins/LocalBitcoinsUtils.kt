@@ -20,14 +20,16 @@ import java.net.URI
 import java.net.URISyntaxException
 import java.nio.charset.Charset
 import java.util.*
+import java.util.concurrent.locks.ReentrantLock
 import kotlin.collections.ArrayList
 
-object LocalBitcoinsUtils {
+class LocalBitcoinsUtils(private val localBitcoinsKey: String, private val localBitcoinsSecret: String) {
 
+    private val lock = ReentrantLock()
     private val objectMapper = ObjectMapper().registerModule(KotlinModule())
 
     @Throws(JsonParseException::class, JsonMappingException::class, IOException::class)
-    fun getAd(adId: Int?, localBitcoinsKey: String, localBitcoinsSecret: String): Advertisment {
+    fun getAd(adId: Int): Advertisment {
         val parameterCollection = ParameterCollection(ArrayList())
         val request = LocalBitcoinsRequest(
             localBitcoinsKey,
@@ -36,14 +38,21 @@ object LocalBitcoinsUtils {
             parameterCollection,
             LocalBitcoinsRequest.HttpType.GET
         )
-        val data = request.get()
+
+        val data: String
+        lock.lock()
+        try {
+            data = request.get()
+        } finally {
+            lock.unlock()
+        }
 
         val advertisements = objectMapper.readValue<Advertisements>(data)
         return advertisements.advertismentsData.advertismentList[0]
     }
 
     @Throws(JsonParseException::class, JsonMappingException::class, IOException::class)
-    fun getTransaction(transactionId: String, localBitcoinsKey: String, localBitcoinsSecret: String): Contact {
+    fun getTransaction(transactionId: String): Contact {
         val parameterCollection = ParameterCollection(ArrayList())
         val request = LocalBitcoinsRequest(
             localBitcoinsKey,
@@ -52,16 +61,18 @@ object LocalBitcoinsUtils {
             parameterCollection,
             LocalBitcoinsRequest.HttpType.GET
         )
-        val data = request.get()
+        val data: String
+        lock.lock()
+        try {
+            data = request.get()
+        } finally {
+            lock.unlock()
+        }
         return objectMapper.readValue(data)
     }
 
     @Throws(URISyntaxException::class, JsonParseException::class, JsonMappingException::class, IOException::class)
-    fun getTransactionListUntil(
-        transactionId: String,
-        localBitcoinsKey: String,
-        localBitcoinsSecret: String
-    ): List<Contact> {
+    fun getTransactionListUntil(transactionId: String): List<Contact> {
         var parameterCollection = ParameterCollection(ArrayList())
         val contacts = ArrayList<Contact>()
 
@@ -73,7 +84,13 @@ object LocalBitcoinsUtils {
                 parameterCollection,
                 LocalBitcoinsRequest.HttpType.GET
             )
-            val data = request.get()
+            val data: String
+            lock.lock()
+            try {
+                data = request.get()
+            } finally {
+                lock.unlock()
+            }
 
             val localBitcoinsDashboard = objectMapper.readValue<LocalBitcoinsDashboard>(data)
             for (contact in localBitcoinsDashboard.data.contact) {
@@ -94,11 +111,7 @@ object LocalBitcoinsUtils {
     }
 
     @Throws(URISyntaxException::class, JsonParseException::class, JsonMappingException::class, IOException::class)
-    fun getTransactionListUntil(
-        date: Date,
-        localBitcoinsKey: String,
-        localBitcoinsSecret: String
-    ): List<Contact> {
+    fun getTransactionListUntil(date: Date): List<Contact> {
         var parameterCollection = ParameterCollection(ArrayList())
         val contacts = ArrayList<Contact>()
 
@@ -111,10 +124,13 @@ object LocalBitcoinsUtils {
                 LocalBitcoinsRequest.HttpType.GET
             )
             var data: String
+            lock.lock()
             try {
                 data = request.get()
             } catch (e: IOException) {
                 continue
+            } finally {
+                lock.unlock()
             }
 
             val localBitcoinsDashboard = objectMapper.readValue<LocalBitcoinsDashboard>(data)
@@ -136,7 +152,7 @@ object LocalBitcoinsUtils {
     }
 
     @Throws(URISyntaxException::class, JsonParseException::class, JsonMappingException::class, IOException::class)
-    fun getOpenTransactions(localBitcoinsKey: String, localBitcoinsSecret: String): List<Contact> {
+    fun getOpenTransactions(): List<Contact> {
         var parameterCollection = ParameterCollection(ArrayList())
         val contacts = ArrayList<Contact>()
 
@@ -148,7 +164,13 @@ object LocalBitcoinsUtils {
                 parameterCollection,
                 LocalBitcoinsRequest.HttpType.GET
             )
-            val data = request.get()
+            val data: String
+            lock.lock()
+            try {
+                data = request.get()
+            } finally {
+                lock.unlock()
+            }
 
             val localBitcoinsDashboard = objectMapper.readValue<LocalBitcoinsDashboard>(data)
             for (contact in localBitcoinsDashboard.data.contact) {
@@ -170,7 +192,7 @@ object LocalBitcoinsUtils {
     }
 
     @Throws(JsonParseException::class, JsonMappingException::class, IOException::class)
-    fun getWallet(localBitcoinsKey: String, localBitcoinsSecret: String): Wallet {
+    fun getWallet(): Wallet {
         val parameterCollection = ParameterCollection(ArrayList())
         val request = LocalBitcoinsRequest(
             localBitcoinsKey,
@@ -179,12 +201,18 @@ object LocalBitcoinsUtils {
             parameterCollection,
             LocalBitcoinsRequest.HttpType.GET
         )
-        val data = request.get()
+        val data: String
+        lock.lock()
+        try {
+            data = request.get()
+        } finally {
+            lock.unlock()
+        }
         return objectMapper.readValue(data)
     }
 
     @Throws(JsonParseException::class, JsonMappingException::class, IOException::class)
-    fun getFees(localBitcoinsKey: String, localBitcoinsSecret: String): Fees {
+    fun getFees(): Fees {
         val parameterCollection = ParameterCollection(ArrayList())
         val request = LocalBitcoinsRequest(
             localBitcoinsKey,
@@ -193,16 +221,18 @@ object LocalBitcoinsUtils {
             parameterCollection,
             LocalBitcoinsRequest.HttpType.GET
         )
-        val data = request.get()
+        val data: String
+        lock.lock()
+        try {
+            data = request.get()
+        } finally {
+            lock.unlock()
+        }
         return objectMapper.readValue(data)
     }
 
     @Throws(JsonParseException::class, JsonMappingException::class, IOException::class)
-    fun getContactMessages(
-        localBitcoinsKey: String,
-        localBitcoinsSecret: String,
-        contactId: String
-    ): ContactMessages {
+    fun getContactMessages(contactId: String): ContactMessages {
         val parameterCollection = ParameterCollection(ArrayList())
         val request = LocalBitcoinsRequest(
             localBitcoinsKey,
@@ -211,17 +241,18 @@ object LocalBitcoinsUtils {
             parameterCollection,
             LocalBitcoinsRequest.HttpType.GET
         )
-        val data = request.get()
+        val data: String
+        lock.lock()
+        try {
+            data = request.get()
+        } finally {
+            lock.unlock()
+        }
         return objectMapper.readValue(data)
     }
 
     @Throws(IOException::class)
-    fun contactMessagePost(
-        localBitcoinsKey: String,
-        localBitcoinsSecret: String,
-        contactId: String,
-        message: String
-    ): String {
+    fun contactMessagePost(contactId: String, message: String): String {
         val parameterCollection = ParameterCollection(ArrayList())
         parameterCollection.add(BasicNameValuePair("msg", message))
         val request = LocalBitcoinsRequest(
@@ -231,11 +262,16 @@ object LocalBitcoinsUtils {
             parameterCollection,
             LocalBitcoinsRequest.HttpType.POST
         )
-        return request.get()
+        lock.lock()
+        try {
+            return request.get()
+        } finally {
+            lock.unlock()
+        }
     }
 
     @Throws(IOException::class)
-    fun contactRelease(localBitcoinsKey: String, localBitcoinsSecret: String, contactId: String): String {
+    fun contactRelease(contactId: String): String {
         val parameterCollection = ParameterCollection(ArrayList())
         val request = LocalBitcoinsRequest(
             localBitcoinsKey,
@@ -244,11 +280,16 @@ object LocalBitcoinsUtils {
             parameterCollection,
             LocalBitcoinsRequest.HttpType.POST
         )
-        return request.get()
+        lock.lock()
+        try {
+            return request.get()
+        } finally {
+            lock.unlock()
+        }
     }
 
     @Throws(IOException::class)
-    fun getAccountInfo(localBitcoinsKey: String, localBitcoinsSecret: String, username: String): AccountInfo {
+    fun getAccountInfo(username: String): AccountInfo {
         val parameterCollection = ParameterCollection(ArrayList())
         val request = LocalBitcoinsRequest(
             localBitcoinsKey,
@@ -257,11 +298,16 @@ object LocalBitcoinsUtils {
             parameterCollection,
             LocalBitcoinsRequest.HttpType.GET
         )
-        return objectMapper.readValue(request.get())
+        lock.lock()
+        try {
+            return objectMapper.readValue(request.get())
+        } finally {
+            lock.unlock()
+        }
     }
 
     @Throws(IOException::class)
-    fun getMyself(localBitcoinsKey: String, localBitcoinsSecret: String): AccountInfo {
+    fun getMyself(): AccountInfo {
         val parameterCollection = ParameterCollection(ArrayList())
         val request = LocalBitcoinsRequest(
             localBitcoinsKey,
@@ -270,6 +316,11 @@ object LocalBitcoinsUtils {
             parameterCollection,
             LocalBitcoinsRequest.HttpType.GET
         )
-        return objectMapper.readValue(request.get())
+        lock.lock()
+        try {
+            return objectMapper.readValue(request.get())
+        } finally {
+            lock.unlock()
+        }
     }
 }
