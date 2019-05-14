@@ -34,23 +34,23 @@ data class ContactData (
         @JsonProperty("amount_btc")
         val amountBtc: BigDecimal,
         @JsonProperty("canceled_at")
-        val canceledAt: Date?,
+        val canceledAt: Date? = null,
         @JsonProperty("buyer")
         val buyer: Profile,
         @JsonProperty("closed_at")
-        val closedAt: Date?,
+        val closedAt: Date? = null,
         @JsonProperty("funded_at")
-        val fundedAt: Date?,
+        val fundedAt: Date? = null,
         @JsonProperty("account_info")
-        val accountInfo: String?,
+        val accountInfo: String? = null,
         @JsonProperty("fee_btc")
         val feeBtc: String,
         @JsonProperty("payment_completed_at")
-        val paymentCompletedAt: Date?,
+        val paymentCompletedAt: Date? = null,
         @JsonProperty("released_at")
-        val releasedAt: Date?,
+        val releasedAt: Date? = null,
         @JsonProperty("disputed_at")
-        val disputedAt: Date?,
+        val disputedAt: Date? = null,
         @JsonProperty("floating")
         val floating: Boolean
 ): Serializable

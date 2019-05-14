@@ -7,17 +7,17 @@ import java.io.Serializable
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class Actions (
     @JsonProperty("message_post_url")
-    val messagePostUrl: String?,
+    val messagePostUrl: String? = null,
     @JsonProperty("advertisement_url")
-    val advertisementUrl: String?,
+    val advertisementUrl: String? = null,
     @JsonProperty("messages_url")
-    val messagesUrl: String?,
+    val messagesUrl: String? = null,
     @JsonProperty("release_url")
-    val releaseUrl: String?,
+    val releaseUrl: String? = null,
     @JsonProperty("dispute_url")
-    val disputeUrl: String?,
+    val disputeUrl: String? = null,
     @JsonProperty("cancel_url")
-    val cancelUrl: String?,
+    val cancelUrl: String? = null,
     @JsonProperty("advertisement_public_view")
-    val advertisementPublicView: String?
+    val advertisementPublicView: String? = null
 ): Serializable
