@@ -1,5 +1,6 @@
 package com.localbitcoins
 
+import java.io.IOException
 import java.net.URLEncoder
 import java.util.concurrent.locks.ReentrantLock
 
@@ -45,8 +46,8 @@ object LocalBitcoinsRequest {
                     .header("Apiauth-Signature", signature)
                     .awaitString()
             }
-        } catch (e: Exception) {
-            throw LocalbitcoinsAPIException(e.message + " " + e.cause + " " + path + " " + parametersString)
+        } catch (e: IOException) {
+            throw LocalbitcoinsAPIException(e.message + " " + path + " " + parametersString)
         } finally {
             lock.unlock()
         }
