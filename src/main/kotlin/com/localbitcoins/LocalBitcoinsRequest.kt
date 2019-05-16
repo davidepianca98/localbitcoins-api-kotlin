@@ -61,6 +61,7 @@ object LocalBitcoinsRequest {
 
     const val WALLET = "$BASE_URL/wallet/"
     const val WALLET_BALANCE = "$BASE_URL/wallet-balance/"
+    const val WALLET_SEND = "$BASE_URL/wallet-send/"
     const val DASHBOARD = "$BASE_URL/dashboard/"
     const val RELEASED = DASHBOARD + "released/"
     const val CANCELED = DASHBOARD + "canceled/"

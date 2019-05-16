@@ -14,6 +14,7 @@ import com.localbitcoins.pojo.fees.Fees
 import com.localbitcoins.pojo.messages.ContactMessages
 import com.localbitcoins.pojo.wallet.Wallet
 import java.io.IOException
+import java.math.BigDecimal
 import java.net.URISyntaxException
 import java.net.URLDecoder
 import java.util.*
@@ -147,6 +148,18 @@ class LocalBitcoinsUtils(private val localBitcoinsKey: String, private val local
         )
 
         return objectMapper.readValue(data)
+    }
+
+    @Throws(IOException::class)
+    suspend fun walletSend(address: String, amount: BigDecimal): String {
+        val parameterCollection = listOf(Pair("address", address), Pair("amount", amount.toString()))
+        return LocalBitcoinsRequest.get(
+            localBitcoinsKey,
+            localBitcoinsSecret,
+            LocalBitcoinsRequest.WALLET_SEND,
+            parameterCollection,
+            LocalBitcoinsRequest.HttpType.POST
+        )
     }
 
     @Throws(JsonParseException::class, JsonMappingException::class, IOException::class)
