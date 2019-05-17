@@ -1,5 +1,7 @@
 package com.localbitcoins
 
+import com.github.kittinunf.fuel.Fuel
+import com.github.kittinunf.fuel.coroutines.awaitString
 import java.io.IOException
 import java.net.URLEncoder
 import java.util.concurrent.locks.ReentrantLock
