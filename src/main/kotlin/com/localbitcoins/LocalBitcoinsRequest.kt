@@ -1,8 +1,7 @@
 package com.localbitcoins
 
 import com.github.kittinunf.fuel.Fuel
-import com.github.kittinunf.fuel.coroutines.awaitString
-import java.io.IOException
+import com.github.kittinunf.fuel.coroutines.awaitStringResult
 import java.net.URLEncoder
 import java.util.concurrent.locks.ReentrantLock
 
@@ -35,21 +34,39 @@ object LocalBitcoinsRequest {
         )
 
         lock.lock()
-        return try {
-            when (type) {
+        try {
+            return when (type) {
                 HttpType.GET -> Fuel.get(path, parameters)
                     .header("Apiauth-Key", localBitcoinsKey)
                     .header("Apiauth-Nonce", nonce)
                     .header("Apiauth-Signature", signature)
-                    .awaitString()
+                    .awaitStringResult()
+                    .fold(
+                        { data -> data },
+                        { error ->
+                            throw LocalbitcoinsAPIException(
+                                "${error.message} " + path + " " + parametersString + " " + String(
+                                    error.errorData
+                                )
+                            )
+                        }
+                    )
                 HttpType.POST -> Fuel.post(path, parameters)
                     .header("Apiauth-Key", localBitcoinsKey)
                     .header("Apiauth-Nonce", nonce)
                     .header("Apiauth-Signature", signature)
-                    .awaitString()
+                    .awaitStringResult()
+                    .fold(
+                        { data -> data },
+                        { error ->
+                            throw LocalbitcoinsAPIException(
+                                "${error.message} " + path + " " + parametersString + " " + String(
+                                    error.errorData
+                                )
+                            )
+                        }
+                    )
             }
-        } catch (e: IOException) {
-            throw LocalbitcoinsAPIException(e.message + " " + path + " " + parametersString)
         } finally {
             lock.unlock()
         }
