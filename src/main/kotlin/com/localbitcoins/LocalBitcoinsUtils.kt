@@ -11,6 +11,7 @@ import com.localbitcoins.pojo.dashboard.LocalBitcoinsDashboard
 import com.localbitcoins.pojo.fees.Fees
 import com.localbitcoins.pojo.messages.ContactMessages
 import com.localbitcoins.pojo.wallet.Wallet
+import com.localbitcoins.pojo.wallet.WalletSend
 import java.math.BigDecimal
 import java.net.URLDecoder
 import java.util.*
@@ -140,15 +141,17 @@ class LocalBitcoinsUtils(private val localBitcoinsKey: String, private val local
         return objectMapper.readValue(data)
     }
 
-    suspend fun walletSend(address: String, amount: BigDecimal): String {
+    suspend fun walletSend(address: String, amount: BigDecimal): WalletSend {
         val parameterCollection = listOf(Pair("address", address), Pair("amount", amount.toString()))
-        return LocalBitcoinsRequest.get(
+        val data = LocalBitcoinsRequest.get(
             localBitcoinsKey,
             localBitcoinsSecret,
             LocalBitcoinsRequest.WALLET_SEND,
             parameterCollection,
             LocalBitcoinsRequest.HttpType.POST
         )
+
+        return objectMapper.readValue(data)
     }
 
     suspend fun getFees(): Fees {
