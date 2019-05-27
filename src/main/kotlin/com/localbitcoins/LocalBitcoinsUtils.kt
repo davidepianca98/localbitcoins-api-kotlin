@@ -137,7 +137,6 @@ class LocalBitcoinsUtils(private val localBitcoinsKey: String, private val local
             null,
             LocalBitcoinsRequest.HttpType.GET
         )
-
         return objectMapper.readValue(data)
     }
 
