@@ -24,7 +24,7 @@ object LocalBitcoinsRequest {
             "$p1&$p2"
         } ?: ""
 
-        val nonce = ((System.currentTimeMillis() * 1000) + 2000).toString()
+        val nonce = (System.currentTimeMillis() * 1000).toString()
         val signature = HMACSignature.calculate(
             localBitcoinsKey,
             localBitcoinsSecret,
