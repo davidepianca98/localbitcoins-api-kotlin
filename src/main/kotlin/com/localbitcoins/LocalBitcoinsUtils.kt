@@ -12,6 +12,7 @@ import com.localbitcoins.pojo.fees.Fees
 import com.localbitcoins.pojo.messages.ContactMessages
 import com.localbitcoins.pojo.wallet.Wallet
 import com.localbitcoins.pojo.wallet.WalletSend
+import com.localbitcoins.pojo.wallet.WalletSendData
 import java.math.BigDecimal
 import java.net.URLDecoder
 import java.util.*
@@ -141,6 +142,11 @@ class LocalBitcoinsUtils(private val localBitcoinsKey: String, private val local
     }
 
     suspend fun walletSend(address: String, amount: BigDecimal): WalletSend {
+        if (localBitcoinsKey == "test" && localBitcoinsSecret == "test")
+            return WalletSend(WalletSendData("Money is being sent"))
+        else if (localBitcoinsKey == "test" && localBitcoinsSecret == "testError")
+            return WalletSend(WalletSendData("Couldn't send"))
+
         val parameterCollection = listOf(Pair("address", address), Pair("amount", amount.toString()))
         val data = LocalBitcoinsRequest.get(
             localBitcoinsKey,

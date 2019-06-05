@@ -28,7 +28,7 @@ object LocalBitcoinsRequest {
         val signature = HMACSignature.calculate(
             localBitcoinsKey,
             localBitcoinsSecret,
-            path.substringAfter("https://localbitcoins.com").replace("?", ""),
+            path.substringAfter(BASE_URL).replace("?", ""),
             parametersString,
             nonce
         )
@@ -76,21 +76,22 @@ object LocalBitcoinsRequest {
         GET, POST
     }
 
-    private const val BASE_URL = "https://localbitcoins.com/api"
+    private const val BASE_URL = "https://localbitcoins.com"
+    private const val API_BASE_URL = "$BASE_URL/api"
 
-    const val WALLET = "$BASE_URL/wallet/"
-    const val WALLET_BALANCE = "$BASE_URL/wallet-balance/"
-    const val WALLET_SEND = "$BASE_URL/wallet-send/"
-    const val DASHBOARD = "$BASE_URL/dashboard/"
+    const val WALLET = "$API_BASE_URL/wallet/"
+    const val WALLET_BALANCE = "$API_BASE_URL/wallet-balance/"
+    const val WALLET_SEND = "$API_BASE_URL/wallet-send/"
+    const val DASHBOARD = "$API_BASE_URL/dashboard/"
     const val RELEASED = DASHBOARD + "released/"
     const val CANCELED = DASHBOARD + "canceled/"
     const val CLOSED = DASHBOARD + "closed/"
-    const val FEES = "$BASE_URL/fees/"
-    const val MYSELF = "$BASE_URL/myself/"
-    const val ACCOUNT_INFO = "$BASE_URL/account_info/"
-    const val CONTACT_RELEASE = "$BASE_URL/contact_release/"
-    const val AD_GET = "$BASE_URL/ad-get/"
-    const val CONTACT_INFO = "$BASE_URL/contact_info/"
-    const val CONTACT_MESSAGES = "$BASE_URL/contact_messages/"
-    const val CONTACT_MESSAGE_POST = "$BASE_URL/contact_message_post/"
+    const val FEES = "$API_BASE_URL/fees/"
+    const val MYSELF = "$API_BASE_URL/myself/"
+    const val ACCOUNT_INFO = "$API_BASE_URL/account_info/"
+    const val CONTACT_RELEASE = "$API_BASE_URL/contact_release/"
+    const val AD_GET = "$API_BASE_URL/ad-get/"
+    const val CONTACT_INFO = "$API_BASE_URL/contact_info/"
+    const val CONTACT_MESSAGES = "$API_BASE_URL/contact_messages/"
+    const val CONTACT_MESSAGE_POST = "$API_BASE_URL/contact_message_post/"
 }
