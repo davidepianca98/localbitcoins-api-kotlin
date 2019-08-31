@@ -3,6 +3,7 @@ package com.localbitcoins.pojo.dashboard
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.localbitcoins.pojo.Profile
+import com.localbitcoins.pojo.accountdetails.AccountDetails
 import java.io.Serializable
 import java.math.BigDecimal
 import java.util.*
@@ -41,6 +42,8 @@ data class ContactData (
         val closedAt: Date? = null,
     @JsonProperty("funded_at")
         val fundedAt: Date? = null,
+    @JsonProperty("account_details")
+    val accountDetails: AccountDetails? = null,
     @JsonProperty("account_info")
         val accountInfo: String? = null,
     @JsonProperty("fee_btc")

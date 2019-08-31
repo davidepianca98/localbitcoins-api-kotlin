@@ -61,7 +61,7 @@ class LocalBitcoinsUtils(private val localBitcoinsKey: String, private val local
 
             val localBitcoinsDashboard = objectMapper.readValue<LocalBitcoinsDashboard>(data)
             for (contact in localBitcoinsDashboard.data.contact) {
-                if (contact.data.releasedAt != null && contact.data.isSelling) {
+                if (contact.data.releasedAt != null) {
                     if (contact.data.contactId == Integer.parseInt(transactionId)) {
                         // Reverse the transaction list to get them from oldest to newest
                         contacts.reverse()
