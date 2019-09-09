@@ -1,6 +1,7 @@
 package com.localbitcoins
 
 import com.github.kittinunf.fuel.Fuel
+import com.github.kittinunf.fuel.coroutines.awaitByteArrayResult
 import com.github.kittinunf.fuel.coroutines.awaitStringResult
 import java.net.URLEncoder
 import java.util.concurrent.locks.ReentrantLock
@@ -67,6 +68,43 @@ object LocalBitcoinsRequest {
                         }
                     )
             }
+        } finally {
+            lock.unlock()
+        }
+    }
+
+    suspend fun getBinary(
+        localBitcoinsKey: String,
+        localBitcoinsSecret: String,
+        path: String
+    ): ByteArray {
+
+        val nonce = (System.currentTimeMillis() * 1000).toString()
+        val signature = HMACSignature.calculate(
+            localBitcoinsKey,
+            localBitcoinsSecret,
+            path.substringAfter(BASE_URL).replace("?", ""),
+            "",
+            nonce
+        )
+
+        lock.lock()
+        return try {
+            Fuel.get(path)
+                .header("Apiauth-Key", localBitcoinsKey)
+                .header("Apiauth-Nonce", nonce)
+                .header("Apiauth-Signature", signature)
+                .awaitByteArrayResult()
+                .fold(
+                    { data -> data },
+                    { error ->
+                        throw LocalbitcoinsAPIException(
+                            "${error.message} " + path + String(
+                                error.errorData
+                            )
+                        )
+                    }
+                )
         } finally {
             lock.unlock()
         }

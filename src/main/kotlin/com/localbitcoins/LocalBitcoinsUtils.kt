@@ -183,6 +183,14 @@ class LocalBitcoinsUtils(private val localBitcoinsKey: String, private val local
         return objectMapper.readValue(data)
     }
 
+    suspend fun getMessageAttachment(attachmentUrl: String): ByteArray {
+        return LocalBitcoinsRequest.getBinary(
+            localBitcoinsKey,
+            localBitcoinsSecret,
+            attachmentUrl
+        )
+    }
+
     suspend fun contactMessagePost(contactId: String, message: String): String {
         val parameterCollection = listOf(Pair("msg", message))
         return LocalBitcoinsRequest.get(
