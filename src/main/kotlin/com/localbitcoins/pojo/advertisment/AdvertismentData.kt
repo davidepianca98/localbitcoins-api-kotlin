@@ -45,7 +45,7 @@ data class AdvertismentData (
     @JsonProperty("price_equation")
     val priceEquation: String,
     @JsonProperty("first_time_limit_btc")
-    val firstTimeLimitBtc: String,
+    val firstTimeLimitBtc: String?,
     @JsonProperty("city")
     val city: String,
     @JsonProperty("location_string")
