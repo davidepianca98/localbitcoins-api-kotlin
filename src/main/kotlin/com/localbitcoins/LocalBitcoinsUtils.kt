@@ -183,6 +183,8 @@ class LocalBitcoinsUtils(private val localBitcoinsKey: String, private val local
         return objectMapper.readValue(data)
     }
 
+    data class Attachment(val name: String, val type: String, val url: String)
+
     suspend fun getMessageAttachment(attachmentUrl: String): ByteArray {
         return LocalBitcoinsRequest.getBinary(
             localBitcoinsKey,
