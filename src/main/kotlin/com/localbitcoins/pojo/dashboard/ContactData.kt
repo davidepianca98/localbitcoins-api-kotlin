@@ -9,51 +9,51 @@ import java.math.BigDecimal
 import java.util.*
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-data class ContactData (
+data class ContactData(
     @JsonProperty("exchange_rate_updated_at")
-        val exchangeRateUpdatedAt: Date,
+    val exchangeRateUpdatedAt: Date,
     @JsonProperty("advertisement")
-        val advertisement: Advertisement,
+    val advertisement: Advertisement,
     @JsonProperty("is_buying")
-        val isBuying: Boolean,
+    val isBuying: Boolean,
     @JsonProperty("created_at")
-        val createdAt: Date,
+    val createdAt: Date,
     @JsonProperty("reference_code")
-        val referenceCode: String,
+    val referenceCode: String,
     @JsonProperty("contact_id")
-        val contactId: Int,
+    val contactId: Int,
     @JsonProperty("seller")
-        val seller: Profile,
+    val seller: Profile,
     @JsonProperty("currency")
-        val currency: String,
+    val currency: String,
     @JsonProperty("amount")
-        val amount: BigDecimal,
+    val amount: BigDecimal,
     @JsonProperty("is_selling")
-        val isSelling: Boolean,
+    val isSelling: Boolean,
     @JsonProperty("escrowed_at")
-        val escrowedAt: Date?,
+    val escrowedAt: Date?,
     @JsonProperty("amount_btc")
-        val amountBtc: BigDecimal,
+    val amountBtc: BigDecimal,
     @JsonProperty("canceled_at")
-        val canceledAt: Date? = null,
+    val canceledAt: Date? = null,
     @JsonProperty("buyer")
-        val buyer: Profile,
+    val buyer: Profile,
     @JsonProperty("closed_at")
-        val closedAt: Date? = null,
+    val closedAt: Date? = null,
     @JsonProperty("funded_at")
-        val fundedAt: Date? = null,
+    val fundedAt: Date? = null,
     @JsonProperty("account_details")
     val accountDetails: AccountDetails? = null,
     @JsonProperty("account_info")
-        val accountInfo: String? = null,
+    val accountInfo: String? = null,
     @JsonProperty("fee_btc")
     val feeBtc: BigDecimal,
     @JsonProperty("payment_completed_at")
-        val paymentCompletedAt: Date? = null,
+    val paymentCompletedAt: Date? = null,
     @JsonProperty("released_at")
-        val releasedAt: Date? = null,
+    val releasedAt: Date? = null,
     @JsonProperty("disputed_at")
-        val disputedAt: Date? = null,
+    val disputedAt: Date? = null,
     @JsonProperty("floating")
-        val floating: Boolean
-): Serializable
+    val floating: Boolean
+) : Serializable

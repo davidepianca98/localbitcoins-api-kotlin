@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import java.io.Serializable
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-data class Actions (
+data class Actions(
     @JsonProperty("message_post_url")
     val messagePostUrl: String? = null,
     @JsonProperty("advertisement_url")
@@ -20,4 +20,4 @@ data class Actions (
     val cancelUrl: String? = null,
     @JsonProperty("advertisement_public_view")
     val advertisementPublicView: String? = null
-): Serializable
+) : Serializable
