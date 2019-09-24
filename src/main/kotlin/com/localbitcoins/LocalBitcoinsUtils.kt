@@ -147,7 +147,7 @@ class LocalBitcoinsUtils(private val localBitcoinsKey: String, private val local
         else if (localBitcoinsKey == "test" && localBitcoinsSecret == "testError")
             return WalletSend(WalletSendData("Couldn't send"))
 
-        val parameterCollection = listOf(Pair("address", address), Pair("amount", amount.toString()))
+        val parameterCollection = mapOf("address" to address, "amount" to amount.toString())
         val data = LocalBitcoinsRequest.get(
             localBitcoinsKey,
             localBitcoinsSecret,
@@ -194,7 +194,7 @@ class LocalBitcoinsUtils(private val localBitcoinsKey: String, private val local
     }
 
     suspend fun contactMessagePost(contactId: String, message: String): String {
-        val parameterCollection = listOf(Pair("msg", message))
+        val parameterCollection = mapOf("msg" to message)
         return LocalBitcoinsRequest.get(
             localBitcoinsKey,
             localBitcoinsSecret,

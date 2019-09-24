@@ -1,32 +1,50 @@
 package com.localbitcoins
 
-import com.github.kittinunf.fuel.Fuel
-import com.github.kittinunf.fuel.coroutines.awaitByteArrayResult
-import com.github.kittinunf.fuel.coroutines.awaitStringResult
+import com.fasterxml.jackson.databind.ObjectMapper
+import io.ktor.client.HttpClient
+import io.ktor.client.request.get
+import io.ktor.client.request.header
+import io.ktor.client.request.post
+import io.ktor.http.ContentType
+import io.ktor.http.content.TextContent
 import java.net.URLEncoder
-import java.util.concurrent.locks.ReentrantLock
 
 
 object LocalBitcoinsRequest {
 
-    private val lock = ReentrantLock()
+    private val client = HttpClient()
+
+    private fun generateSignature(
+        localBitcoinsKey: String,
+        localBitcoinsSecret: String,
+        path: String,
+        parametersString: String,
+        nonce: String
+    ): String =
+        HMACSignature.calculate(
+            localBitcoinsKey,
+            localBitcoinsSecret,
+            path,
+            parametersString,
+            nonce
+        )
 
     suspend fun get(
         localBitcoinsKey: String,
         localBitcoinsSecret: String,
         path: String,
-        parameters: List<Pair<String, String>>?,
+        parameters: Map<String, String>?,
         type: HttpType
     ): String {
 
         val parametersString = parameters?.map { p ->
-            URLEncoder.encode(p.first, "UTF-8") + "=" + URLEncoder.encode(p.second, "UTF-8")
+            URLEncoder.encode(p.key, "UTF-8") + "=" + URLEncoder.encode(p.value, "UTF-8")
         }?.reduce { p1, p2 ->
             "$p1&$p2"
         } ?: ""
 
         val nonce = (System.currentTimeMillis() * 1000).toString()
-        val signature = HMACSignature.calculate(
+        val signature = generateSignature(
             localBitcoinsKey,
             localBitcoinsSecret,
             path.substringAfter(BASE_URL).replace("?", ""),
@@ -34,42 +52,25 @@ object LocalBitcoinsRequest {
             nonce
         )
 
-        lock.lock()
         try {
             return when (type) {
-                HttpType.GET -> Fuel.get(path, parameters)
-                    .header("Apiauth-Key", localBitcoinsKey)
-                    .header("Apiauth-Nonce", nonce)
-                    .header("Apiauth-Signature", signature)
-                    .awaitStringResult()
-                    .fold(
-                        { data -> data },
-                        { error ->
-                            throw LocalbitcoinsAPIException(
-                                "${error.message} " + path + " " + parametersString + " " + String(
-                                    error.errorData
-                                )
-                            )
-                        }
+                HttpType.GET -> client.get(path + if (parametersString.isEmpty()) "" else "?$parametersString") {
+                    header("Apiauth-Key", localBitcoinsKey)
+                    header("Apiauth-Nonce", nonce)
+                    header("Apiauth-Signature", signature)
+                }
+                HttpType.POST -> client.post(path) {
+                    header("Apiauth-Key", localBitcoinsKey)
+                    header("Apiauth-Nonce", nonce)
+                    header("Apiauth-Signature", signature)
+                    body = TextContent(
+                        ObjectMapper().writeValueAsString(parameters),
+                        contentType = ContentType.Application.Json
                     )
-                HttpType.POST -> Fuel.post(path, parameters)
-                    .header("Apiauth-Key", localBitcoinsKey)
-                    .header("Apiauth-Nonce", nonce)
-                    .header("Apiauth-Signature", signature)
-                    .awaitStringResult()
-                    .fold(
-                        { data -> data },
-                        { error ->
-                            throw LocalbitcoinsAPIException(
-                                "${error.message} " + path + " " + parametersString + " " + String(
-                                    error.errorData
-                                )
-                            )
-                        }
-                    )
+                }
             }
-        } finally {
-            lock.unlock()
+        } catch (t: Throwable) {
+            throw LocalbitcoinsAPIException("${t.message} " + path + " " + parametersString)
         }
     }
 
@@ -78,9 +79,8 @@ object LocalBitcoinsRequest {
         localBitcoinsSecret: String,
         path: String
     ): ByteArray {
-
         val nonce = (System.currentTimeMillis() * 1000).toString()
-        val signature = HMACSignature.calculate(
+        val signature = generateSignature(
             localBitcoinsKey,
             localBitcoinsSecret,
             path.substringAfter(BASE_URL).replace("?", ""),
@@ -88,25 +88,14 @@ object LocalBitcoinsRequest {
             nonce
         )
 
-        lock.lock()
         return try {
-            Fuel.get(path)
-                .header("Apiauth-Key", localBitcoinsKey)
-                .header("Apiauth-Nonce", nonce)
-                .header("Apiauth-Signature", signature)
-                .awaitByteArrayResult()
-                .fold(
-                    { data -> data },
-                    { error ->
-                        throw LocalbitcoinsAPIException(
-                            "${error.message} " + path + String(
-                                error.errorData
-                            )
-                        )
-                    }
-                )
-        } finally {
-            lock.unlock()
+            client.get(path) {
+                header("Apiauth-Key", localBitcoinsKey)
+                header("Apiauth-Nonce", nonce)
+                header("Apiauth-Signature", signature)
+            }
+        } catch (t: Throwable) {
+            throw LocalbitcoinsAPIException("${t.message} " + path)
         }
     }
 
