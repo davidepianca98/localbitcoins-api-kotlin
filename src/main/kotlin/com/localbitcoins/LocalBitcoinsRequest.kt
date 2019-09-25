@@ -1,6 +1,5 @@
 package com.localbitcoins
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.localbitcoins.LocalBitcoinsUtils.Companion.CHARSET
 import io.ktor.client.HttpClient
 import io.ktor.client.features.ResponseException
@@ -65,10 +64,7 @@ object LocalBitcoinsRequest {
                     header("Apiauth-Key", localBitcoinsKey)
                     header("Apiauth-Nonce", nonce)
                     header("Apiauth-Signature", signature)
-                    body = TextContent(
-                        ObjectMapper().writeValueAsString(parameters),
-                        contentType = ContentType.Application.Json
-                    )
+                    body = TextContent(parametersString, contentType = ContentType.Application.FormUrlEncoded)
                 }
             }
         } catch (t: Throwable) {
