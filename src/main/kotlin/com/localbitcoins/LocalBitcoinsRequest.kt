@@ -1,13 +1,19 @@
 package com.localbitcoins
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.localbitcoins.LocalBitcoinsUtils.Companion.CHARSET
 import io.ktor.client.HttpClient
+import io.ktor.client.features.ResponseException
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
+import io.ktor.client.response.readText
 import io.ktor.http.ContentType
 import io.ktor.http.content.TextContent
+import kotlinx.coroutines.CancellationException
+import org.apache.commons.codec.binary.Hex
 import java.net.URLEncoder
+import javax.crypto.Mac
 
 
 object LocalBitcoinsRequest {
@@ -16,22 +22,18 @@ object LocalBitcoinsRequest {
 
     private fun generateSignature(
         localBitcoinsKey: String,
-        localBitcoinsSecret: String,
+        sha256HMAC: Mac,
         path: String,
         parametersString: String,
         nonce: String
-    ): String =
-        HMACSignature.calculate(
-            localBitcoinsKey,
-            localBitcoinsSecret,
-            path,
-            parametersString,
-            nonce
-        )
+    ): String {
+        val message: String = nonce + localBitcoinsKey + path + parametersString
+        return Hex.encodeHexString(sha256HMAC.doFinal(message.toByteArray(charset(CHARSET)))).toUpperCase()
+    }
 
     suspend fun get(
         localBitcoinsKey: String,
-        localBitcoinsSecret: String,
+        sha256HMAC: Mac,
         path: String,
         parameters: Map<String, String>?,
         type: HttpType
@@ -46,7 +48,7 @@ object LocalBitcoinsRequest {
         val nonce = (System.currentTimeMillis() * 1000).toString()
         val signature = generateSignature(
             localBitcoinsKey,
-            localBitcoinsSecret,
+            sha256HMAC,
             path.substringAfter(BASE_URL).replace("?", ""),
             parametersString,
             nonce
@@ -70,19 +72,26 @@ object LocalBitcoinsRequest {
                 }
             }
         } catch (t: Throwable) {
-            throw LocalbitcoinsAPIException("${t.message} " + path + " " + parametersString)
+            when (t) {
+                is CancellationException -> throw t
+                is ResponseException -> throw LocalbitcoinsAPIException(
+                    "${t.message} " + path + " " + parametersString + " " + t.response.readText(),
+                    t
+                )
+                else -> throw LocalbitcoinsAPIException("${t.message} " + path + " " + parametersString, t)
+            }
         }
     }
 
     suspend fun getBinary(
         localBitcoinsKey: String,
-        localBitcoinsSecret: String,
+        sha256HMAC: Mac,
         path: String
     ): ByteArray {
         val nonce = (System.currentTimeMillis() * 1000).toString()
         val signature = generateSignature(
             localBitcoinsKey,
-            localBitcoinsSecret,
+            sha256HMAC,
             path.substringAfter(BASE_URL).replace("?", ""),
             "",
             nonce
@@ -95,7 +104,14 @@ object LocalBitcoinsRequest {
                 header("Apiauth-Signature", signature)
             }
         } catch (t: Throwable) {
-            throw LocalbitcoinsAPIException("${t.message} " + path)
+            when (t) {
+                is CancellationException -> throw t
+                is ResponseException -> throw LocalbitcoinsAPIException(
+                    "${t.message} " + path + " " + t.response.readText(),
+                    t
+                )
+                else -> throw LocalbitcoinsAPIException("${t.message} " + path, t)
+            }
         }
     }
 
