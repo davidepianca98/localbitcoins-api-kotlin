@@ -16,28 +16,15 @@ import com.localbitcoins.pojo.wallet.WalletSendData
 import java.math.BigDecimal
 import java.net.URLDecoder
 import java.util.*
-import javax.crypto.Mac
-import javax.crypto.spec.SecretKeySpec
 
 class LocalBitcoinsUtils(private val localBitcoinsKey: String, private val localBitcoinsSecret: String) {
 
     private val objectMapper = ObjectMapper().registerModule(KotlinModule())
-    private val sha256HMAC = Mac.getInstance(METHOD)
-    private val secretKey = SecretKeySpec(localBitcoinsSecret.toByteArray(charset(CHARSET)), METHOD)
-
-    companion object {
-        private const val METHOD = "HmacSHA256"
-        const val CHARSET = "UTF-8"
-    }
-
-    init {
-        sha256HMAC.init(secretKey)
-    }
 
     suspend fun getAd(adId: Int): Advertisment {
         val data = LocalBitcoinsRequest.get(
             localBitcoinsKey,
-            sha256HMAC,
+            localBitcoinsSecret,
             LocalBitcoinsRequest.AD_GET + "$adId/",
             null,
             LocalBitcoinsRequest.HttpType.GET
@@ -50,7 +37,7 @@ class LocalBitcoinsUtils(private val localBitcoinsKey: String, private val local
     suspend fun getTransaction(transactionId: String): Contact {
         val data = LocalBitcoinsRequest.get(
             localBitcoinsKey,
-            sha256HMAC,
+            localBitcoinsSecret,
             LocalBitcoinsRequest.CONTACT_INFO + "$transactionId/",
             null,
             LocalBitcoinsRequest.HttpType.GET
@@ -66,7 +53,7 @@ class LocalBitcoinsUtils(private val localBitcoinsKey: String, private val local
         while (true) {
             val data = LocalBitcoinsRequest.get(
                 localBitcoinsKey,
-                sha256HMAC,
+                localBitcoinsSecret,
                 url,
                 null,
                 LocalBitcoinsRequest.HttpType.GET
@@ -95,7 +82,7 @@ class LocalBitcoinsUtils(private val localBitcoinsKey: String, private val local
         while (true) {
             val data = LocalBitcoinsRequest.get(
                 localBitcoinsKey,
-                sha256HMAC,
+                localBitcoinsSecret,
                 url,
                 null,
                 LocalBitcoinsRequest.HttpType.GET
@@ -124,7 +111,7 @@ class LocalBitcoinsUtils(private val localBitcoinsKey: String, private val local
         while (true) {
             val data = LocalBitcoinsRequest.get(
                 localBitcoinsKey,
-                sha256HMAC,
+                localBitcoinsSecret,
                 url,
                 null,
                 LocalBitcoinsRequest.HttpType.GET
@@ -146,7 +133,7 @@ class LocalBitcoinsUtils(private val localBitcoinsKey: String, private val local
     suspend fun getWallet(): Wallet {
         val data = LocalBitcoinsRequest.get(
             localBitcoinsKey,
-            sha256HMAC,
+            localBitcoinsSecret,
             LocalBitcoinsRequest.WALLET,
             null,
             LocalBitcoinsRequest.HttpType.GET
@@ -163,7 +150,7 @@ class LocalBitcoinsUtils(private val localBitcoinsKey: String, private val local
         val parameterCollection = mapOf("address" to address, "amount" to amount.toString())
         val data = LocalBitcoinsRequest.get(
             localBitcoinsKey,
-            sha256HMAC,
+            localBitcoinsSecret,
             LocalBitcoinsRequest.WALLET_SEND,
             parameterCollection,
             LocalBitcoinsRequest.HttpType.POST
@@ -175,7 +162,7 @@ class LocalBitcoinsUtils(private val localBitcoinsKey: String, private val local
     suspend fun getFees(): Fees {
         val data = LocalBitcoinsRequest.get(
             localBitcoinsKey,
-            sha256HMAC,
+            localBitcoinsSecret,
             LocalBitcoinsRequest.FEES,
             null,
             LocalBitcoinsRequest.HttpType.GET
@@ -187,7 +174,7 @@ class LocalBitcoinsUtils(private val localBitcoinsKey: String, private val local
     suspend fun getContactMessages(contactId: String): ContactMessages {
         val data = LocalBitcoinsRequest.get(
             localBitcoinsKey,
-            sha256HMAC,
+            localBitcoinsSecret,
             LocalBitcoinsRequest.CONTACT_MESSAGES + "$contactId/",
             null,
             LocalBitcoinsRequest.HttpType.GET
@@ -201,8 +188,8 @@ class LocalBitcoinsUtils(private val localBitcoinsKey: String, private val local
     suspend fun getMessageAttachment(attachmentUrl: String): ByteArray {
         return LocalBitcoinsRequest.getBinary(
             localBitcoinsKey,
-            sha256HMAC,
-            attachmentUrl
+            localBitcoinsSecret,
+            attachmentUrl.replace(":443", "")
         )
     }
 
@@ -210,7 +197,7 @@ class LocalBitcoinsUtils(private val localBitcoinsKey: String, private val local
         val parameterCollection = mapOf("msg" to message)
         return LocalBitcoinsRequest.get(
             localBitcoinsKey,
-            sha256HMAC,
+            localBitcoinsSecret,
             LocalBitcoinsRequest.CONTACT_MESSAGE_POST + "$contactId/",
             parameterCollection,
             LocalBitcoinsRequest.HttpType.POST
@@ -220,7 +207,7 @@ class LocalBitcoinsUtils(private val localBitcoinsKey: String, private val local
     suspend fun contactRelease(contactId: String): String {
         return LocalBitcoinsRequest.get(
             localBitcoinsKey,
-            sha256HMAC,
+            localBitcoinsSecret,
             LocalBitcoinsRequest.CONTACT_RELEASE + "$contactId/",
             null,
             LocalBitcoinsRequest.HttpType.POST
@@ -230,7 +217,7 @@ class LocalBitcoinsUtils(private val localBitcoinsKey: String, private val local
     suspend fun getAccountInfo(username: String): AccountInfo {
         val data = LocalBitcoinsRequest.get(
             localBitcoinsKey,
-            sha256HMAC,
+            localBitcoinsSecret,
             LocalBitcoinsRequest.ACCOUNT_INFO + "$username/",
             null,
             LocalBitcoinsRequest.HttpType.GET
@@ -241,7 +228,7 @@ class LocalBitcoinsUtils(private val localBitcoinsKey: String, private val local
     suspend fun getMyself(): AccountInfo {
         val data = LocalBitcoinsRequest.get(
             localBitcoinsKey,
-            sha256HMAC,
+            localBitcoinsSecret,
             LocalBitcoinsRequest.MYSELF,
             null,
             LocalBitcoinsRequest.HttpType.GET

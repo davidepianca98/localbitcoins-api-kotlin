@@ -1,6 +1,5 @@
 package com.localbitcoins
 
-import com.localbitcoins.LocalBitcoinsUtils.Companion.CHARSET
 import io.ktor.client.HttpClient
 import io.ktor.client.features.ResponseException
 import io.ktor.client.request.get
@@ -10,45 +9,66 @@ import io.ktor.client.response.readText
 import io.ktor.http.ContentType
 import io.ktor.http.content.TextContent
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.apache.commons.codec.binary.Hex
 import java.net.URLEncoder
 import javax.crypto.Mac
+import javax.crypto.spec.SecretKeySpec
 
 
 object LocalBitcoinsRequest {
 
     private val client = HttpClient()
+    private val mutex = Mutex()
+
+    private const val METHOD = "HmacSHA256"
+    private const val CHARSET = "UTF-8"
+
+    private suspend fun generateNonce(): String {
+        return mutex.withLock {
+            // Make sure all the nonces are different
+            (System.currentTimeMillis() * 1000).toString()
+        }
+    }
 
     private fun generateSignature(
         localBitcoinsKey: String,
-        sha256HMAC: Mac,
+        localBitcoinsSecret: String,
         path: String,
         parametersString: String,
         nonce: String
     ): String {
-        val message: String = nonce + localBitcoinsKey + path + parametersString
-        return Hex.encodeHexString(sha256HMAC.doFinal(message.toByteArray(charset(CHARSET)))).toUpperCase()
+        val message = nonce + localBitcoinsKey + path + parametersString
+        val sha256HMAC = Mac.getInstance(METHOD)
+        val secretKey = SecretKeySpec(localBitcoinsSecret.toByteArray(charset(CHARSET)), METHOD)
+        sha256HMAC.init(secretKey)
+        val data = sha256HMAC.doFinal(message.toByteArray(charset(CHARSET)))
+        return Hex.encodeHexString(data).toUpperCase()
+    }
+
+    private fun Map<String, String>.toUrlParameters(): String {
+        return map { p ->
+            URLEncoder.encode(p.key, "UTF-8") + "=" + URLEncoder.encode(p.value, "UTF-8")
+        }.reduce { p1, p2 ->
+            "$p1&$p2"
+        }
     }
 
     suspend fun get(
         localBitcoinsKey: String,
-        sha256HMAC: Mac,
+        localBitcoinsSecret: String,
         path: String,
         parameters: Map<String, String>?,
         type: HttpType
     ): String {
+        val parametersString = parameters?.toUrlParameters() ?: ""
 
-        val parametersString = parameters?.map { p ->
-            URLEncoder.encode(p.key, "UTF-8") + "=" + URLEncoder.encode(p.value, "UTF-8")
-        }?.reduce { p1, p2 ->
-            "$p1&$p2"
-        } ?: ""
-
-        val nonce = (System.currentTimeMillis() * 1000).toString()
+        val nonce = generateNonce()
         val signature = generateSignature(
             localBitcoinsKey,
-            sha256HMAC,
-            path.substringAfter(BASE_URL).replace("?", ""),
+            localBitcoinsSecret,
+            path.substringAfter(BASE_URL),
             parametersString,
             nonce
         )
@@ -81,13 +101,13 @@ object LocalBitcoinsRequest {
 
     suspend fun getBinary(
         localBitcoinsKey: String,
-        sha256HMAC: Mac,
+        localBitcoinsSecret: String,
         path: String
     ): ByteArray {
-        val nonce = (System.currentTimeMillis() * 1000).toString()
+        val nonce = generateNonce()
         val signature = generateSignature(
             localBitcoinsKey,
-            sha256HMAC,
+            localBitcoinsSecret,
             path.substringAfter(BASE_URL).replace("?", ""),
             "",
             nonce
