@@ -25,12 +25,7 @@ object LocalBitcoinsRequest {
     private const val METHOD = "HmacSHA256"
     private const val CHARSET = "UTF-8"
 
-    private suspend fun generateNonce(): String {
-        return mutex.withLock {
-            // Make sure all the nonces are different
-            (System.currentTimeMillis() * 1000).toString()
-        }
-    }
+    private fun generateNonce(): String = (System.currentTimeMillis() * 1000).toString()
 
     private fun generateSignature(
         localBitcoinsKey: String,
@@ -64,37 +59,39 @@ object LocalBitcoinsRequest {
     ): String {
         val parametersString = parameters?.toUrlParameters() ?: ""
 
-        val nonce = generateNonce()
-        val signature = generateSignature(
-            localBitcoinsKey,
-            localBitcoinsSecret,
-            path.substringAfter(BASE_URL),
-            parametersString,
-            nonce
-        )
+        mutex.withLock {
+            val nonce = generateNonce()
+            val signature = generateSignature(
+                localBitcoinsKey,
+                localBitcoinsSecret,
+                path.substringAfter(BASE_URL),
+                parametersString,
+                nonce
+            )
 
-        try {
-            return when (type) {
-                HttpType.GET -> client.get(path + if (parametersString.isEmpty()) "" else "?$parametersString") {
-                    header("Apiauth-Key", localBitcoinsKey)
-                    header("Apiauth-Nonce", nonce)
-                    header("Apiauth-Signature", signature)
+            try {
+                return when (type) {
+                    HttpType.GET -> client.get(path + if (parametersString.isEmpty()) "" else "?$parametersString") {
+                        header("Apiauth-Key", localBitcoinsKey)
+                        header("Apiauth-Nonce", nonce)
+                        header("Apiauth-Signature", signature)
+                    }
+                    HttpType.POST -> client.post(path) {
+                        header("Apiauth-Key", localBitcoinsKey)
+                        header("Apiauth-Nonce", nonce)
+                        header("Apiauth-Signature", signature)
+                        body = TextContent(parametersString, contentType = ContentType.Application.FormUrlEncoded)
+                    }
                 }
-                HttpType.POST -> client.post(path) {
-                    header("Apiauth-Key", localBitcoinsKey)
-                    header("Apiauth-Nonce", nonce)
-                    header("Apiauth-Signature", signature)
-                    body = TextContent(parametersString, contentType = ContentType.Application.FormUrlEncoded)
+            } catch (t: Throwable) {
+                when (t) {
+                    is CancellationException -> throw t
+                    is ResponseException -> throw LocalbitcoinsAPIException(
+                        "${t.message} " + path + " " + parametersString + " " + t.response.readText(),
+                        t
+                    )
+                    else -> throw LocalbitcoinsAPIException("${t.message} " + path + " " + parametersString, t)
                 }
-            }
-        } catch (t: Throwable) {
-            when (t) {
-                is CancellationException -> throw t
-                is ResponseException -> throw LocalbitcoinsAPIException(
-                    "${t.message} " + path + " " + parametersString + " " + t.response.readText(),
-                    t
-                )
-                else -> throw LocalbitcoinsAPIException("${t.message} " + path + " " + parametersString, t)
             }
         }
     }
@@ -104,29 +101,31 @@ object LocalBitcoinsRequest {
         localBitcoinsSecret: String,
         path: String
     ): ByteArray {
-        val nonce = generateNonce()
-        val signature = generateSignature(
-            localBitcoinsKey,
-            localBitcoinsSecret,
-            path.substringAfter(BASE_URL).replace("?", ""),
-            "",
-            nonce
-        )
+        mutex.withLock {
+            val nonce = generateNonce()
+            val signature = generateSignature(
+                localBitcoinsKey,
+                localBitcoinsSecret,
+                path.substringAfter(BASE_URL).replace("?", ""),
+                "",
+                nonce
+            )
 
-        return try {
-            client.get(path) {
-                header("Apiauth-Key", localBitcoinsKey)
-                header("Apiauth-Nonce", nonce)
-                header("Apiauth-Signature", signature)
-            }
-        } catch (t: Throwable) {
-            when (t) {
-                is CancellationException -> throw t
-                is ResponseException -> throw LocalbitcoinsAPIException(
-                    "${t.message} " + path + " " + t.response.readText(),
-                    t
-                )
-                else -> throw LocalbitcoinsAPIException("${t.message} " + path, t)
+            return try {
+                client.get(path) {
+                    header("Apiauth-Key", localBitcoinsKey)
+                    header("Apiauth-Nonce", nonce)
+                    header("Apiauth-Signature", signature)
+                }
+            } catch (t: Throwable) {
+                when (t) {
+                    is CancellationException -> throw t
+                    is ResponseException -> throw LocalbitcoinsAPIException(
+                        "${t.message} " + path + " " + t.response.readText(),
+                        t
+                    )
+                    else -> throw LocalbitcoinsAPIException("${t.message} " + path, t)
+                }
             }
         }
     }
