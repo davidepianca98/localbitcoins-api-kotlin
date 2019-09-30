@@ -57,21 +57,31 @@ object LocalBitcoinsRequest {
         parameters: Map<String, String>?,
         type: HttpType
     ): String {
-        val parametersString = parameters?.toUrlParameters() ?: ""
+        val parametersString = parameters?.toUrlParameters()
+        return getWithStringParameters(localBitcoinsKey, localBitcoinsSecret, path, parametersString, type)
+    }
 
+    suspend fun getWithStringParameters(
+        localBitcoinsKey: String,
+        localBitcoinsSecret: String,
+        path: String,
+        parametersString: String?,
+        type: HttpType
+    ): String {
+        val parameters = parametersString ?: ""
         mutex.withLock {
             val nonce = generateNonce()
             val signature = generateSignature(
                 localBitcoinsKey,
                 localBitcoinsSecret,
                 path.substringAfter(BASE_URL),
-                parametersString,
+                parameters,
                 nonce
             )
 
             try {
                 return when (type) {
-                    HttpType.GET -> client.get(path + if (parametersString.isEmpty()) "" else "?$parametersString") {
+                    HttpType.GET -> client.get(path + if (parameters.isEmpty()) "" else "?$parameters") {
                         header("Apiauth-Key", localBitcoinsKey)
                         header("Apiauth-Nonce", nonce)
                         header("Apiauth-Signature", signature)
@@ -80,7 +90,7 @@ object LocalBitcoinsRequest {
                         header("Apiauth-Key", localBitcoinsKey)
                         header("Apiauth-Nonce", nonce)
                         header("Apiauth-Signature", signature)
-                        body = TextContent(parametersString, contentType = ContentType.Application.FormUrlEncoded)
+                        body = TextContent(parameters, contentType = ContentType.Application.FormUrlEncoded)
                     }
                 }
             } catch (t: Throwable) {

@@ -51,11 +51,12 @@ class LocalBitcoinsUtils(private val localBitcoinsKey: String, private val local
         val contacts = ArrayList<Contact>()
 
         while (true) {
-            val data = LocalBitcoinsRequest.get(
+            val urlSplit = url.split("?")
+            val data = LocalBitcoinsRequest.getWithStringParameters(
                 localBitcoinsKey,
                 localBitcoinsSecret,
-                url,
-                null,
+                urlSplit[0],
+                urlSplit.getOrNull(1),
                 LocalBitcoinsRequest.HttpType.GET
             )
 
@@ -80,11 +81,12 @@ class LocalBitcoinsUtils(private val localBitcoinsKey: String, private val local
         val contacts = ArrayList<Contact>()
 
         while (true) {
-            val data = LocalBitcoinsRequest.get(
+            val urlSplit = url.split("?")
+            val data = LocalBitcoinsRequest.getWithStringParameters(
                 localBitcoinsKey,
                 localBitcoinsSecret,
-                url,
-                null,
+                urlSplit[0],
+                urlSplit.getOrNull(1),
                 LocalBitcoinsRequest.HttpType.GET
             )
 
@@ -109,11 +111,12 @@ class LocalBitcoinsUtils(private val localBitcoinsKey: String, private val local
         var url = LocalBitcoinsRequest.DASHBOARD
 
         while (true) {
-            val data = LocalBitcoinsRequest.get(
+            val urlSplit = url.split("?")
+            val data = LocalBitcoinsRequest.getWithStringParameters(
                 localBitcoinsKey,
                 localBitcoinsSecret,
-                url,
-                null,
+                urlSplit[0],
+                urlSplit.getOrNull(1),
                 LocalBitcoinsRequest.HttpType.GET
             )
 
