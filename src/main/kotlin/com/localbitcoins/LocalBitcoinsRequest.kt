@@ -162,4 +162,5 @@ object LocalBitcoinsRequest {
     const val CONTACT_INFO = "$API_BASE_URL/contact_info/"
     const val CONTACT_MESSAGES = "$API_BASE_URL/contact_messages/"
     const val CONTACT_MESSAGE_POST = "$API_BASE_URL/contact_message_post/"
+    const val USER_FEEDBACK = "$API_BASE_URL/feedback/"
 }

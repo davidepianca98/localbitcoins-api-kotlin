@@ -238,4 +238,15 @@ class LocalBitcoinsUtils(private val localBitcoinsKey: String, private val local
         )
         return objectMapper.readValue(data)
     }
+
+    suspend fun userFeedback(username: String, level: String, message: String): String {
+        val parameterCollection = mapOf("feedback" to level, "msg" to message)
+        return LocalBitcoinsRequest.get(
+            localBitcoinsKey,
+            localBitcoinsSecret,
+            LocalBitcoinsRequest.USER_FEEDBACK + username,
+            parameterCollection,
+            LocalBitcoinsRequest.HttpType.POST
+        )
+    }
 }
