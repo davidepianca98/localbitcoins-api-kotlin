@@ -106,11 +106,22 @@ class LocalBitcoinsUtils(private val localBitcoinsKey: String, private val local
         }
     }
 
-    suspend fun getOpenTransactions(closed: Boolean = false): List<Contact> {
+    suspend fun getDashboard(pageUrl: String): LocalBitcoinsDashboard {
+        val urlSplit = pageUrl.split("?")
+        val data = LocalBitcoinsRequest.getWithStringParameters(
+            localBitcoinsKey,
+            localBitcoinsSecret,
+            urlSplit[0],
+            urlSplit.getOrNull(1),
+            LocalBitcoinsRequest.HttpType.GET
+        )
+
+        return objectMapper.readValue(data)
+    }
+
+    suspend fun getOpenTransactions(): List<Contact> {
         val contacts = ArrayList<Contact>()
         var url = LocalBitcoinsRequest.DASHBOARD
-        if (closed)
-            url = LocalBitcoinsRequest.CLOSED
 
         while (true) {
             val urlSplit = url.split("?")
