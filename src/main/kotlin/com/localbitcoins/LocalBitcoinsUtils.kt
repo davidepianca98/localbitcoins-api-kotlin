@@ -106,9 +106,11 @@ class LocalBitcoinsUtils(private val localBitcoinsKey: String, private val local
         }
     }
 
-    suspend fun getOpenTransactions(): List<Contact> {
+    suspend fun getOpenTransactions(closed: Boolean = false): List<Contact> {
         val contacts = ArrayList<Contact>()
         var url = LocalBitcoinsRequest.DASHBOARD
+        if (closed)
+            url = LocalBitcoinsRequest.CLOSED
 
         while (true) {
             val urlSplit = url.split("?")
