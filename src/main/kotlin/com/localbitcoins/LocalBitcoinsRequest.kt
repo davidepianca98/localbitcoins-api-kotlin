@@ -1,6 +1,7 @@
 package com.localbitcoins
 
 import io.ktor.client.HttpClient
+import io.ktor.client.engine.apache.Apache
 import io.ktor.client.features.ResponseException
 import io.ktor.client.request.get
 import io.ktor.client.request.header
@@ -19,7 +20,12 @@ import javax.crypto.spec.SecretKeySpec
 
 object LocalBitcoinsRequest {
 
-    private val client = HttpClient()
+    private val client = HttpClient(Apache) {
+        engine {
+            socketTimeout = 30_000
+            connectTimeout = 30_000
+        }
+    }
     private val mutex = Mutex()
 
     private const val METHOD = "HmacSHA256"
