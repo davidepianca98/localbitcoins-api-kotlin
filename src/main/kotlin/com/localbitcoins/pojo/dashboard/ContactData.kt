@@ -21,7 +21,7 @@ data class ContactData(
     @JsonProperty("reference_code")
     val referenceCode: String,
     @JsonProperty("contact_id")
-    val contactId: Int,
+    val contactId: Long,
     @JsonProperty("seller")
     val seller: Profile,
     @JsonProperty("currency")

@@ -46,7 +46,7 @@ class LocalBitcoinsUtils(private val localBitcoinsKey: String, private val local
         return objectMapper.readValue(data)
     }
 
-    suspend fun getTransactionListUntil(transactionId: String): List<Contact> {
+    suspend fun getTransactionListUntil(transactionId: Long): List<Contact> {
         var url = LocalBitcoinsRequest.RELEASED
         val contacts = ArrayList<Contact>()
 
@@ -63,7 +63,7 @@ class LocalBitcoinsUtils(private val localBitcoinsKey: String, private val local
             val localBitcoinsDashboard = objectMapper.readValue<LocalBitcoinsDashboard>(data)
             for (contact in localBitcoinsDashboard.data.contact) {
                 if (contact.data.releasedAt != null) {
-                    if (contact.data.contactId == Integer.parseInt(transactionId)) {
+                    if (contact.data.contactId == transactionId) {
                         // Reverse the transaction list to get them from oldest to newest
                         contacts.reverse()
                         return contacts
@@ -187,7 +187,7 @@ class LocalBitcoinsUtils(private val localBitcoinsKey: String, private val local
         return objectMapper.readValue(data)
     }
 
-    suspend fun getContactMessages(contactId: String): ContactMessages {
+    suspend fun getContactMessages(contactId: Long): ContactMessages {
         val data = LocalBitcoinsRequest.get(
             localBitcoinsKey,
             localBitcoinsSecret,
@@ -209,7 +209,7 @@ class LocalBitcoinsUtils(private val localBitcoinsKey: String, private val local
         )
     }
 
-    suspend fun contactMessagePost(contactId: String, message: String): String {
+    suspend fun contactMessagePost(contactId: Long, message: String): String {
         val parameterCollection = mapOf("msg" to message)
         return LocalBitcoinsRequest.get(
             localBitcoinsKey,
@@ -220,7 +220,7 @@ class LocalBitcoinsUtils(private val localBitcoinsKey: String, private val local
         )
     }
 
-    suspend fun contactRelease(contactId: String): String {
+    suspend fun contactRelease(contactId: Long): String {
         return LocalBitcoinsRequest.get(
             localBitcoinsKey,
             localBitcoinsSecret,
