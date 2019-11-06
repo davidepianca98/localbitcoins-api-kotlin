@@ -257,7 +257,7 @@ class LocalBitcoinsUtils(private val localBitcoinsKey: String, private val local
         return LocalBitcoinsRequest.get(
             localBitcoinsKey,
             localBitcoinsSecret,
-            LocalBitcoinsRequest.USER_FEEDBACK + username,
+            LocalBitcoinsRequest.USER_FEEDBACK + "$username/",
             parameterCollection,
             LocalBitcoinsRequest.HttpType.POST
         )
