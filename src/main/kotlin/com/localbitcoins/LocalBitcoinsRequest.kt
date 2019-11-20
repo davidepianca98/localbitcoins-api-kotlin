@@ -1,5 +1,7 @@
 package com.localbitcoins
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.apache.Apache
 import io.ktor.client.features.ResponseException
@@ -102,10 +104,14 @@ object LocalBitcoinsRequest {
             } catch (t: Throwable) {
                 when (t) {
                     is CancellationException -> throw t
-                    is ResponseException -> throw LocalbitcoinsAPIException(
-                        "${t.message} " + path + " " + parametersString + " " + t.response.readText(),
-                        t
-                    )
+                    is ResponseException -> {
+                        val content = t.response.readText()
+                        throw LocalbitcoinsAPIException(
+                            "${t.message} " + path + " " + parametersString + " " + content,
+                            t,
+                            jacksonObjectMapper().readValue(content)
+                        )
+                    }
                     else -> throw LocalbitcoinsAPIException("${t.message} " + path + " " + parametersString, t)
                 }
             }
@@ -136,10 +142,14 @@ object LocalBitcoinsRequest {
             } catch (t: Throwable) {
                 when (t) {
                     is CancellationException -> throw t
-                    is ResponseException -> throw LocalbitcoinsAPIException(
-                        "${t.message} " + path + " " + t.response.readText(),
-                        t
-                    )
+                    is ResponseException -> {
+                        val content = t.response.readText()
+                        throw LocalbitcoinsAPIException(
+                            "${t.message} " + path + " " + content,
+                            t,
+                            jacksonObjectMapper().readValue(content)
+                        )
+                    }
                     else -> throw LocalbitcoinsAPIException("${t.message} " + path, t)
                 }
             }
