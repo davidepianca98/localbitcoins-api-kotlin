@@ -1,7 +1,10 @@
 package com.localbitcoins
 
+import com.fasterxml.jackson.annotation.JsonProperty
+
 data class LocalbitcoinsApiErrorMessage(
     val message: String,
+    @JsonProperty("error_code")
     val errorCode: Int
 )
 
