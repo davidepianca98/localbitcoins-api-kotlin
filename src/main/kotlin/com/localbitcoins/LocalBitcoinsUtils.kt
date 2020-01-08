@@ -1,6 +1,7 @@
 package com.localbitcoins
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.PropertyNamingStrategy
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.localbitcoins.pojo.accountinfo.AccountInfo
@@ -12,14 +13,15 @@ import com.localbitcoins.pojo.fees.Fees
 import com.localbitcoins.pojo.messages.ContactMessages
 import com.localbitcoins.pojo.wallet.Wallet
 import com.localbitcoins.pojo.wallet.WalletSend
-import com.localbitcoins.pojo.wallet.WalletSendData
 import java.math.BigDecimal
 import java.net.URLDecoder
 import java.util.*
 
 class LocalBitcoinsUtils(private val localBitcoinsKey: String, private val localBitcoinsSecret: String) {
 
-    private val objectMapper = ObjectMapper().registerModule(KotlinModule())
+    private val objectMapper = ObjectMapper().registerModule(KotlinModule()).setPropertyNamingStrategy(
+        PropertyNamingStrategy.SNAKE_CASE
+    )
 
     suspend fun getAd(adId: Int): Advertisment {
         val data = LocalBitcoinsRequest.get(
@@ -31,7 +33,7 @@ class LocalBitcoinsUtils(private val localBitcoinsKey: String, private val local
         )
 
         val advertisements = objectMapper.readValue<Advertisements>(data)
-        return advertisements.advertismentsData.advertismentList[0]
+        return advertisements.data.adList[0]
     }
 
     suspend fun getTransaction(transactionId: String): Contact {
@@ -61,7 +63,7 @@ class LocalBitcoinsUtils(private val localBitcoinsKey: String, private val local
             )
 
             val localBitcoinsDashboard = objectMapper.readValue<LocalBitcoinsDashboard>(data)
-            for (contact in localBitcoinsDashboard.data.contact) {
+            for (contact in localBitcoinsDashboard.data.contactList) {
                 if (contact.data.releasedAt != null) {
                     if (contact.data.contactId == transactionId) {
                         // Reverse the transaction list to get them from oldest to newest
@@ -91,7 +93,7 @@ class LocalBitcoinsUtils(private val localBitcoinsKey: String, private val local
             )
 
             val localBitcoinsDashboard = objectMapper.readValue<LocalBitcoinsDashboard>(data)
-            for (contact in localBitcoinsDashboard.data.contact) {
+            for (contact in localBitcoinsDashboard.data.contactList) {
                 if (contact.data.isSelling) {
                     if (contact.data.releasedAt!! < date) {
                         // Reverse the transaction list to get them from oldest to newest
@@ -134,7 +136,7 @@ class LocalBitcoinsUtils(private val localBitcoinsKey: String, private val local
             )
 
             val localBitcoinsDashboard = objectMapper.readValue<LocalBitcoinsDashboard>(data)
-            for (contact in localBitcoinsDashboard.data.contact) {
+            for (contact in localBitcoinsDashboard.data.contactList) {
                 if (contact.data.isSelling) {
                     contacts.add(contact)
                 }
@@ -158,11 +160,6 @@ class LocalBitcoinsUtils(private val localBitcoinsKey: String, private val local
     }
 
     suspend fun walletSend(address: String, amount: BigDecimal): WalletSend {
-        if (localBitcoinsKey == "test" && localBitcoinsSecret == "test")
-            return WalletSend(WalletSendData("Money is being sent"))
-        else if (localBitcoinsKey == "test" && localBitcoinsSecret == "testError")
-            return WalletSend(WalletSendData("Couldn't send"))
-
         val parameterCollection = mapOf("address" to address, "amount" to amount.toString())
         val data = LocalBitcoinsRequest.get(
             localBitcoinsKey,
